@@ -13,11 +13,18 @@ def print_usage():
 
 def extract_files(file):
     appName = ntpath.basename(file).split('.')[0]
-    folderPath = "APKs/" + appName
+    folderPath = "OutputAPKs/" + appName
 
     if not os.path.isdir(folderPath):
-        #subprocess.run("mkdir -p " + folderPath, shell=True)
-        subprocess.run('java -jar '+ os.getcwd()+"/dependencies/apktool.jar" +' d {} -o {}'.format(file,folderPath), shell=True)
+        #Todo: Add option to re-disassemble if files are already present
+
+        print("APK given as input \nUnpacking now")
+        jadx = os.getcwd() + "/dependencies/jadx-1.2.0/bin/jadx"
+
+        subprocess.run("mkdir -p " + folderPath, shell=True)
+        #subprocess.run('java -jar '+ os.getcwd()+"/dependencies/apktool.jar" +' d {} -o {}'.format(file,folderPath), shell=True)
+        subprocess.run(jadx + " -d {} {}".format(folderPath, file), shell=True)
+        return folderPath + "/resources/AndroidManifest.xml"
     
 
 def print_app_details(xmlDoc):
@@ -61,7 +68,10 @@ try:
             print_exported_components(xmlDoc)
 
         elif inputExtension == 'apk':
-            extract_files(sys.argv[1])
+            manifestLocation = extract_files(sys.argv[1])
+            xmlDoc = parse_xml(manifestLocation)
+            print_app_details(xmlDoc)
+            print_exported_components(xmlDoc)
             pass
 
         else:

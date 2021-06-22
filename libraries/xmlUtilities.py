@@ -29,6 +29,3 @@ def get_exported_components(xmlDoc):
                 exportedComponents.append(component + ": \t" + atr.getAttribute("android:name"))
 
     return exportedComponents
-
-
-    
