@@ -1,6 +1,6 @@
 import subprocess
 from xml.dom import minidom
-from xml.etree import ElementTree
+import xml.etree.ElementTree as tree
 
 def parse_xml(xml):
     return minidom.parse(xml)
@@ -29,3 +29,17 @@ def get_exported_components(xmlDoc):
                 exportedComponents.append(component + ": \t" + atr.getAttribute("android:name"))
 
     return exportedComponents
+
+
+def parse_xml_strings(xmlDoc):
+    strings = []
+
+    stringsXML = tree.parse(xmlDoc)
+    root = stringsXML.getroot()
+
+    for child in root.iter():
+        if child.tag == "string" and child.attrib["name"] is not None and child.text is not None:
+            attribute = child.attrib["name"]
+            text = child.text
+            strings.append(child.attrib["name"] + " = " + child.text)
+    return strings

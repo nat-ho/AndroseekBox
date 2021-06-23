@@ -19,12 +19,12 @@ def extract_files(file):
         #Todo: Add option to re-disassemble if files are already present
 
         print("APK given as input \nUnpacking now")
-        jadx = os.getcwd() + "/dependencies/jadx-1.2.0/bin/jadx"
 
-        subprocess.run("mkdir -p " + folderPath, shell=True)
-        #subprocess.run('java -jar '+ os.getcwd()+"/dependencies/apktool.jar" +' d {} -o {}'.format(file,folderPath), shell=True)
+        jadx = os.getcwd() + "/dependencies/jadx-1.2.0/bin/jadx"
+        # subprocess.run("mkdir -p " + folderPath, shell=True)
         subprocess.run(jadx + " -d {} {}".format(folderPath, file), shell=True)
-        return folderPath + "/resources/AndroidManifest.xml"
+
+        return folderPath
     
 
 def print_app_details(xmlDoc):
@@ -61,6 +61,7 @@ try:
     
     else:
         inputExtension = sys.argv[1].split('.')[-1]
+        appName = sys.argv[1].split('.')[0]
         
         if inputExtension == 'xml':
             xmlDoc = parse_xml(sys.argv[1])
@@ -68,11 +69,12 @@ try:
             print_exported_components(xmlDoc)
 
         elif inputExtension == 'apk':
-            manifestLocation = extract_files(sys.argv[1])
-            xmlDoc = parse_xml(manifestLocation)
+            outputPath = extract_files(sys.argv[1])
+            xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
             print_app_details(xmlDoc)
             print_exported_components(xmlDoc)
-            pass
+            strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
+            print(strings)
 
         else:
             print_usage()
