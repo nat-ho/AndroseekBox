@@ -2,7 +2,8 @@ import os
 import sys
 import subprocess
 import ntpath
-from libraries.xmlUtilities import *
+from libraries.xmlUtils import *
+from libraries.apkutils import *
 
 
 def print_usage():
@@ -46,9 +47,8 @@ def print_app_details(xmlDoc):
                 get_attribute(xmlDoc, 'application', 'android:allowBackup'),
                 get_attribute(xmlDoc, 'application', 'android:debuggable')))
 
-def print_exported_components(xmlDoc):
+def print_exported_components(exportedComponents):
     print("---------------------Exported Components---------------------")
-    exportedComponents = get_exported_components(xmlDoc)
     for exportedComponent in exportedComponents:
         if (exportedComponent):
             print(exportedComponent)
@@ -70,11 +70,15 @@ try:
 
         elif inputExtension == 'apk':
             outputPath = extract_files(sys.argv[1])
+
             xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
             print_app_details(xmlDoc)
-            print_exported_components(xmlDoc)
+
+            exportedComponents = get_exported_components(xmlDoc)
+            print_exported_components(exportedComponents)
+
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
-            print(strings)
+            startScan(outputPath)
 
         else:
             print_usage()
