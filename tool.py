@@ -80,6 +80,9 @@ try:
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
             startScan(outputPath)
 
+            deeplinks = get_deeplinks(xmlDoc)
+            printDeepLinksMap(deeplinks)
+
         else:
             print_usage()
 
