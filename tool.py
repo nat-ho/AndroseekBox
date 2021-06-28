@@ -16,7 +16,7 @@ def extract_files(file):
     appName = ntpath.basename(file).split('.')[0]
     folderPath = "OutputAPKs/" + appName
 
-    if not os.path.isdir(folderPath):
+    if (not os.path.isdir(folderPath)):
         #Todo: Add option to re-disassemble if files are already present
 
         print("APK given as input \nUnpacking now")
@@ -29,7 +29,7 @@ def extract_files(file):
     
 
 def print_app_details(xmlDoc):
-    print("""---------------------Application Details---------------------
+    print("""\n---------------------Application Details---------------------
     Name            :{}
     Version Code    :{}
     Version Name    :{}
@@ -39,13 +39,13 @@ def print_app_details(xmlDoc):
     Allow Backup    :{}
     Debuggable      :{}
     """.format(get_attribute(xmlDoc, 'manifest', 'package'), 
-                get_attribute(xmlDoc, 'manifest', 'android:versionCode'),
-                get_attribute(xmlDoc, 'manifest', 'android:versionName'),
-                get_attribute(xmlDoc, 'uses-sdk', 'android:minSdkVersion'),
-                get_attribute(xmlDoc, 'uses-sdk', 'android:targetSdkVersion'),
-                get_attribute(xmlDoc, 'application', 'android:name'),
-                get_attribute(xmlDoc, 'application', 'android:allowBackup'),
-                get_attribute(xmlDoc, 'application', 'android:debuggable')))
+            get_attribute(xmlDoc, 'manifest', 'android:versionCode'),
+            get_attribute(xmlDoc, 'manifest', 'android:versionName'),
+            get_attribute(xmlDoc, 'uses-sdk', 'android:minSdkVersion'),
+            get_attribute(xmlDoc, 'uses-sdk', 'android:targetSdkVersion'),
+            get_attribute(xmlDoc, 'application', 'android:name'),
+            get_attribute(xmlDoc, 'application', 'android:allowBackup'),
+            get_attribute(xmlDoc, 'application', 'android:debuggable')))
 
 def print_exported_components(exportedComponents):
     print("---------------------Exported Components---------------------")
@@ -56,19 +56,19 @@ def print_exported_components(exportedComponents):
 
 try:
 
-    if len(sys.argv[1:]) < 1:
+    if (len(sys.argv[1:]) < 1):
         print_usage()
     
     else:
         inputExtension = sys.argv[1].split('.')[-1]
         appName = sys.argv[1].split('.')[0]
         
-        if inputExtension == 'xml':
+        if (inputExtension == 'xml'):
             xmlDoc = parse_xml(sys.argv[1])
             print_app_details(xmlDoc)
             print_exported_components(xmlDoc)
 
-        elif inputExtension == 'apk':
+        elif (inputExtension == 'apk'):
             outputPath = extract_files(sys.argv[1])
 
             xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
@@ -85,4 +85,3 @@ try:
 
 except Exception as e:
     print(e)
-
