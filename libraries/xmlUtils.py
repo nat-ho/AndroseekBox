@@ -120,7 +120,7 @@ def get_deeplinks(xmlDoc):
     return deeplinksTree
 
 
-def printDeepLinksMap(deeplinks_r):
+def print_deepLinks_map(deeplinks_r):
         deeplinks = deeplinks_r
         a = 0
         print("\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":")

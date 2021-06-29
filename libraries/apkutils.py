@@ -8,7 +8,7 @@ ipRegEx = "\\b(?!(?:10\.|127\.|172\.(?:1[6-9]|2[0-9]|3[0-2])\.|192\.168\.))((?:(
 urlList = []
 ipList = []
 
-def extractUrls(file):
+def extract_urls(file):
     urls = []
     results = re.findall(urlRegEx, file)
     if (len(results) != 0):
@@ -17,7 +17,7 @@ def extractUrls(file):
     return urlList
 
 
-def extractIPs(file):
+def extract_ip(file):
     ips = []
     results = re.findall(ipRegEx, file)
     if (len(results) != 0):
@@ -26,14 +26,14 @@ def extractIPs(file):
     return ipList
 
 
-def printList(list):
+def print_list(list):
     counter = 0
     for item in list:
         counter += 1
         print("{}. {}".format(str(counter), item))
 
 
-def printResult():
+def print_result():
     global urlList, ipList
     urlList = list(set(urlList))
     ipList = list(set(ipList))
@@ -41,18 +41,18 @@ def printResult():
     print("\n---------------------URLs---------------------")
     if (urlList):
         print("List of URLs found in the application")
-        printList(urlList)
+        print_list(urlList)
     else:
         print("No URL was found")
 
     print("\n---------------------IP Addresses---------------------")
     if (ipList):
         print("List of IP addresses found in the application")
-        printList(ipList)
+        print_list(ipList)
     else:
         print("No IP address was found")
 
-def startScan(folderPath):
+def start_initial_scan(folderPath):
     hasException = False
     for subdir, dirs, files in os.walk(folderPath):
         for file in files:
@@ -65,8 +65,8 @@ def startScan(folderPath):
                 hasException = True
 
             try:
-                thread1 = Thread(target = extractUrls, args = (filecontent, ))
-                thread2 = Thread(target = extractIPs, args = (filecontent, ))
+                thread1 = Thread(target = extract_urls, args = (filecontent, ))
+                thread2 = Thread(target = extract_ip, args = (filecontent, ))
 
                 thread1.start()
                 thread2.start()
@@ -78,4 +78,4 @@ def startScan(folderPath):
 
     if hasException:
         print("Some results have have been ommitted due to exceptions")
-    printResult()
+    print_result()
