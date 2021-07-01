@@ -1,5 +1,4 @@
 import os
-from re import U
 import sys
 import subprocess
 import ntpath
@@ -14,20 +13,30 @@ def print_usage():
     ./tool.py path_to_APKFile.APK
     """)
 
-def extract_files(file):
-    appName = ntpath.basename(file).split('.')[0]
-    folderPath = "OutputAPKs/" + appName
+def get_folder_path(apkLocation):
+    appName = ntpath.basename(apkLocation).split('.')[0]
+    return "OutputAPKs/" + appName
 
-    if (not os.path.isdir(folderPath)):
-        #Todo: Add option to re-disassemble if files are already present
+def extract_files(apkLocation):
+    folderPath = get_folder_path(apkLocation)
 
-        print("APK given as input \nUnpacking now")
+    # If files exist, provide user to continue or re unpack APK
+    if (os.path.isdir(folderPath)):
+        reUnpack = input("Files already exist, do you wish to re unpack APK? (Y/N)")
+        if (reUnpack.upper() == "Y"):
+            subprocess.run("rm -r " + folderPath, shell=True)
+        elif (reUnpack.upper() == "N"):
+            return folderPath
+        else:
+            extract_files(userInput)
+    
+    print("APK given as input \nUnpacking now")
+    jadx = os.getcwd() + "/dependencies/jadx-1.2.0/bin/jadx"
+    # subprocess.run("mkdir -p " + folderPath, shell=True)
+    subprocess.run(jadx + " -d {} {}".format(folderPath, apkLocation), shell=True)
 
-        jadx = os.getcwd() + "/dependencies/jadx-1.2.0/bin/jadx"
-        # subprocess.run("mkdir -p " + folderPath, shell=True)
-        subprocess.run(jadx + " -d {} {}".format(folderPath, file), shell=True)
+    return folderPath
 
-        return folderPath
     
 def print_app_details(xmlDoc):
     print("""\n---------------------Application Details---------------------
@@ -62,9 +71,9 @@ def print_module_selection():
 
 
 #Python 3.9 and below
-def execute_module(userInput):
+def execute_module(userInput, folderPath):
     switcher = {
-        '1' : lambda : scan_sms_fraud(outputPath),
+        '1' : lambda : scan_sms_fraud(folderPath),
         'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
@@ -76,7 +85,6 @@ def execute_module(userInput):
 #             scan_sms_fraud()
 #         case _:
 #             print("Unrecognized module ID!")
-
 
 try:
 
@@ -118,7 +126,8 @@ print_module_selection()
 userInput = input("\nModule: ")
 
 while (userInput.lower() != "exit"):
-    execute_module(userInput)
+    folderPath = get_folder_path(sys.argv[1])
+    execute_module(userInput, folderPath)
 
     print_module_selection()
     userInput = input("\nEnter another module: ")
