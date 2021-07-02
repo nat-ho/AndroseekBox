@@ -50,7 +50,7 @@ def print_result():
         print("List of IP addresses found in the application")
         print_list(ipList)
     else:
-        print("No IP address was found")
+        print("No IP address were found")
 
 def start_initial_scan(folderPath):
     hasException = False
