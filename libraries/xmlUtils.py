@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import subprocess
 from xml.dom import minidom
 import xml.etree.ElementTree as tree
 
@@ -13,6 +12,16 @@ def get_attribute(xmlDoc, node, attribute):
     for atr in node:
         if (len(atr.getAttribute(attribute)) > 0):
             return atr.getAttribute(attribute)
+
+
+def get_attribute_list(xmlDoc, node, attribute):
+    attributes = []
+    node = xmlDoc.getElementsByTagName(node)
+
+    for atr in node:
+        attributes.append(atr.getAttribute(attribute))
+
+    return attributes
 
 
 def get_exported_components(xmlDoc):

@@ -3,16 +3,16 @@ import re
 import javalang
 from threading import Thread
 from pathlib import Path
+from libraries.xmlUtils import get_attribute_list
 
 
-# apiRegexList = [".*sendMultimediaMessage\(.*", ".*sendMultipartTextMessage\(.*", ".*sendTextMessage\(.*", ".*sendTextMessageWithoutPersisting\(.*"]
 apiCallsList = ["sendMultimediaMessage", "sendMultipartTextMessage", "sendTextMessage", "sendTextMessageWithoutPersisting"]
-importRegexList = ["android.telephony.SmsManager", "android.telephony.SmsMessage"]
-permissionRegexList = ["android\.permission\.READ_SMS", "android\.permission\.RECEIVE_SMS", "android\.permission\.SEND_SMS"]
+importList = ["android.telephony.SmsManager", "android.telephony.SmsMessage"]
+permissionList = ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS", "android.permission.SEND_SMS", "android.permission.READ_PHONE_STATE"]
 
 foundApiList = []
-foundXmlPermissionList = []
 foundImportList = []
+foundPermissionList = []
 
 def find_api_calls(filePath, sourcecode):
     try:
@@ -24,7 +24,7 @@ def find_api_calls(filePath, sourcecode):
                 foundApiList.append((filePath, packageName, node.member, node.position.line, node.position.column))
 
     except Exception as e:
-        print("Exception occured when parsing {} : :{}".format(filePath, e))
+        print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
 
 
 def find_imports(filePath, sourcecode):
@@ -33,54 +33,69 @@ def find_imports(filePath, sourcecode):
         packageName = tree.package.name
 
         for path, node in tree.filter(javalang.tree.Import):
-            if (node.path in importRegexList):
+            if (node.path in importList):
                 foundImportList.append((filePath, packageName, node.path, node.position.line, node.position.column))
 
     except Exception as e:
-        print("Exception occured when parsing {} : :{}".format(filePath, e))
+        print("Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
 
 
-#Todo: Function to extract permissions from XML and possibly in classes
-def find_permissions(folderPath):
-    pass
+def find_permissions(xmlDoc):
+    try:
+
+        tempPermissionList = get_attribute_list(xmlDoc, "uses-permission", "android:name")
+
+        for permission in tempPermissionList:
+            if (permission in permissionList):
+                foundPermissionList.append(permission)
+    except Exception as e:
+        print("Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
 
 
-#Todo: Function to print results
 def print_result():
-    global foundApiList, foundImportList
+    global foundApiList, foundImportList, foundPermissionList
+    foundApiList = list(set(foundApiList))
+    foundImportList = list(set(foundImportList))
+
     print("\n---------------------Related API Calls---------------------")
-
     if (foundApiList):
-        print("List of API calls related to SMS fraud found in the application")
-        # print_list(urlList)
+        print("\nList of API calls related to SMS fraud found in the application:")
 
-        for result in foundApiList:
-            print("-" * 40)
-            print("File Path: {}".format(result[0]))
-            print("Package: {}".format(result[1]))
-            print("API Call: {}".format(result[2]))
-            print("Line Number & Column Number: ({}, {})".format(result[3], result[4]))
-
+        for apiCallCount, apiCall in enumerate(foundApiList):
+            print("{}.\tFile Path: {}".format(apiCallCount+1, apiCall[0]))
+            print("\tPackage: {}".format(apiCall[1]))
+            print("\tAPI Call: {}".format(apiCall[2]))
+            print("\tLine Number & Column Number: ({}, {})".format(apiCall[3], apiCall[4]))
+            print("-" * 60)
     else:
         print("No related API calls were found")
 
     print("\n---------------------Related Library Imports---------------------")
-
     if (foundImportList):
-        print("List of library imports related to SMS fraud found in the application")
+        print("\nList of class imports related to SMS fraud found in the application:")
 
-        for result in foundImportList:
-            print("-" * 40)
-            print("File Path: {}".format(result[0]))
-            print("Package: {}".format(result[1]))
-            print("Import: {}".format(result[2]))
-            print("Line Number & Column Number: ({}, {})".format(result[3], result[4]))
-
+        for importCount, classImport in enumerate(foundImportList):
+            print("{}.\tFile Path: {}".format(importCount+1, classImport[0]))
+            print("\tPackage: {}".format(classImport[1]))
+            print("\tImport: {}".format(classImport[2]))
+            print("\tLine Number & Column Number: ({}, {})".format(classImport[3], classImport[4]))
+            print("-" * 60)
     else:
-        print("No related library imports were found")
+        print("No related class imports were found")
+
+    print("\n---------------------Related Permissions Declared---------------------")
+    if (foundPermissionList):
+        print("\nList of permissions related to SMS fraud found in the application:")
+
+        for permissionCount, permission in enumerate(foundPermissionList):
+            # print("-" * 40)
+            print("{}.\t{}".format(permissionCount+1, permission))
+        print("-" * 60)
+    else:
+        print("No related permissions were found")
 
 
-def scan_sms_fraud(folderPath):
+def scan_sms_fraud(folderPath, xmlDoc):
     hasException = False
 
     for filePath in Path(folderPath).rglob('*.java'):
@@ -98,14 +113,14 @@ def scan_sms_fraud(folderPath):
 
                 thread1.join()
                 thread2.join()
-
+                
             except Exception as e:
                 print("Error spawing threads")
 
         except Exception as e:
             hasException = True
         
-    find_permissions(folderPath)
+    find_permissions(xmlDoc)
     
     if hasException:
         print("Some results have been ommitted due to exceptions")

@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import ntpath
-from modules.smsFraud import *
+from modules.smsFraud import scan_sms_fraud
 from libraries.xmlUtils import *
 from libraries.apkutils import *
 
@@ -13,9 +13,11 @@ def print_usage():
     ./tool.py path_to_APKFile.APK
     """)
 
+
 def get_folder_path(apkLocation):
     appName = ntpath.basename(apkLocation).split('.')[0]
     return "OutputAPKs/" + appName
+
 
 def extract_files(apkLocation):
     folderPath = get_folder_path(apkLocation)
@@ -37,6 +39,11 @@ def extract_files(apkLocation):
 
     return folderPath
 
+
+def get_xmlDoc(apkLocation):
+    xmlDoc = parse_xml(get_folder_path(apkLocation) + "/resources/AndroidManifest.xml")
+    return xmlDoc
+
     
 def print_app_details(xmlDoc):
     print("""\n---------------------Application Details---------------------
@@ -48,20 +55,22 @@ def print_app_details(xmlDoc):
     App Name        :{}
     Allow Backup    :{}
     Debuggable      :{}
-    """.format(get_attribute(xmlDoc, 'manifest', 'package'), 
-            get_attribute(xmlDoc, 'manifest', 'android:versionCode'),
-            get_attribute(xmlDoc, 'manifest', 'android:versionName'),
-            get_attribute(xmlDoc, 'uses-sdk', 'android:minSdkVersion'),
-            get_attribute(xmlDoc, 'uses-sdk', 'android:targetSdkVersion'),
-            get_attribute(xmlDoc, 'application', 'android:name'),
-            get_attribute(xmlDoc, 'application', 'android:allowBackup'),
-            get_attribute(xmlDoc, 'application', 'android:debuggable')))
+    """.format(get_attribute(xmlDoc, "manifest", "package"), 
+            get_attribute(xmlDoc, "manifest", "android:versionCode"),
+            get_attribute(xmlDoc, "manifest", "android:versionName"),
+            get_attribute(xmlDoc, "uses-sdk", "android:minSdkVersion"),
+            get_attribute(xmlDoc, "uses-sdk", "android:targetSdkVersion"),
+            get_attribute(xmlDoc, "application", "android:name"),
+            get_attribute(xmlDoc, "application", "android:allowBackup"),
+            get_attribute(xmlDoc, "application", "android:debuggable")))
+
 
 def print_exported_components(exportedComponents):
     print("---------------------Exported Components---------------------")
     for exportedComponent in exportedComponents:
         if (exportedComponent):
             print(exportedComponent)
+
 
 def print_module_selection():
     print("\n---------------------Module Selection---------------------")
@@ -71,9 +80,9 @@ def print_module_selection():
 
 
 #Python 3.9 and below
-def execute_module(userInput, folderPath):
+def execute_module(userInput, folderPath, xmlDoc):
     switcher = {
-        '1' : lambda : scan_sms_fraud(folderPath),
+        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
         'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
@@ -85,6 +94,7 @@ def execute_module(userInput, folderPath):
 #             scan_sms_fraud()
 #         case _:
 #             print("Unrecognized module ID!")
+
 
 try:
 
@@ -121,13 +131,13 @@ try:
 except Exception as e:
     print(e)
 
-
 print_module_selection()
 userInput = input("\nModule: ")
 
 while (userInput.lower() != "exit"):
     folderPath = get_folder_path(sys.argv[1])
-    execute_module(userInput, folderPath)
+    xmlDoc = get_xmlDoc(sys.argv[1])
+    execute_module(userInput, folderPath, xmlDoc)
 
     print_module_selection()
     userInput = input("\nEnter another module: ")
