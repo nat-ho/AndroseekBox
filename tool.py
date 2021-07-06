@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 import os
 import sys
 import subprocess
 import ntpath
-from modules.smsFraud import scan_sms_fraud
+import modules
 from libraries.xmlUtils import *
 from libraries.apkutils import *
 
@@ -82,16 +83,20 @@ def print_module_selection():
 #Python 3.9 and below
 def execute_module(userInput, folderPath, xmlDoc):
     switcher = {
-        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
+        '1' : lambda : modules.scan_sms_fraud(folderPath, xmlDoc),
+        '2' : lambda : modules.scan_spyware(folderPath, xmlDoc),
         'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
 
-# #Python 3.10 and above
+
+#Python 3.10 and above
 # def execute_module(userInput):
 #     match userInput:
 #         case '1':
-#             scan_sms_fraud()
+#             modules.scan_sms_fraud(folderPath, xmlDoc)
+#         case '2':
+#             modules.scan_spyware(folderPath, xmlDoc)
 #         case _:
 #             print("Unrecognized module ID!")
 
