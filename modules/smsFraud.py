@@ -1,17 +1,15 @@
-import os
-import re
 import javalang
 from threading import Thread
 from pathlib import Path
 from libraries.xmlUtils import get_attribute_list
 
 
-apiCallsList = ["sendMultimediaMessage", "sendMultipartTextMessage", "sendTextMessage", "sendTextMessageWithoutPersisting"]
-importList = ["android.telephony.SmsManager", "android.telephony.SmsMessage"]
-permissionList = ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS", "android.permission.SEND_SMS", "android.permission.READ_PHONE_STATE"]
+importList = {"android.telephony.SmsManager", "android.telephony.SmsMessage"}
+apiCallsList = {"sendMultimediaMessage", "sendMultipartTextMessage", "sendTextMessage", "sendTextMessageWithoutPersisting"}
+permissionList = {"android.permission.READ_SMS", "android.permission.RECEIVE_SMS", "android.permission.SEND_SMS", "android.permission.READ_PHONE_STATE"}
 
-foundApiList = []
 foundImportList = []
+foundApiList = []
 foundPermissionList = []
 
 def find_api_calls(filePath, sourcecode):
