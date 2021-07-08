@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from xml.dom import minidom
 import xml.etree.ElementTree as tree
 
@@ -24,21 +23,23 @@ def get_attribute_list(xmlDoc, node, attribute):
     return attributes
 
 
-def get_exported_components(xmlDoc):
+def get_app_components(xmlDoc):
     components = ["activity", "activity-alias", "service", "receiver", "provider"]
-    exportedComponents = []
+    applicationComponents = []
 
     for component in components:
         node = xmlDoc.getElementsByTagName(component)
 
         for atr in node:
             if "true" in atr.getAttribute("android:exported"):
-                exportedComponents.append(component + ": \t" + atr.getAttribute("android:name"))
+                applicationComponents.append(component + ": \t" + atr.getAttribute("android:name") + "(EXPORTED)")
             
-            elif atr.getElementsByTagName("intent-filter") and atr.getAttribute("android:name") not in exportedComponents:
-                exportedComponents.append(component + ": \t" + atr.getAttribute("android:name"))
+            elif atr.getElementsByTagName("intent-filter") and atr.getAttribute("android:name") not in applicationComponents:
+                applicationComponents.append(component + ": \t" + atr.getAttribute("android:name") + "(EXPORTED)")
+            else:
+                applicationComponents.append(component + ": \t" + atr.getAttribute("android:name"))
 
-    return exportedComponents
+    return applicationComponents
 
 
 def parse_xml_strings(xmlDoc):

@@ -3,7 +3,8 @@ import os
 import sys
 import subprocess
 import ntpath
-import modules
+from modules.smsFraud import scan_sms_fraud
+# from modules.spyware import scan_spyware
 from libraries.xmlUtils import *
 from libraries.apkutils import *
 
@@ -66,11 +67,11 @@ def print_app_details(xmlDoc):
             get_attribute(xmlDoc, "application", "android:debuggable")))
 
 
-def print_exported_components(exportedComponents):
-    print("---------------------Exported Components---------------------")
-    for exportedComponent in exportedComponents:
-        if (exportedComponent):
-            print(exportedComponent)
+def print_app_components(appComponents):
+    print("---------------------Application Components---------------------")
+    for appComponent in appComponents:
+        if (appComponent):
+            print(appComponent)
 
 
 def print_module_selection():
@@ -83,8 +84,8 @@ def print_module_selection():
 #Python 3.9 and below
 def execute_module(userInput, folderPath, xmlDoc):
     switcher = {
-        '1' : lambda : modules.scan_sms_fraud(folderPath, xmlDoc),
-        '2' : lambda : modules.scan_spyware(folderPath, xmlDoc),
+        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
+        '2' : lambda : scan_spyware(folderPath, xmlDoc),
         'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
@@ -94,9 +95,9 @@ def execute_module(userInput, folderPath, xmlDoc):
 # def execute_module(userInput):
 #     match userInput:
 #         case '1':
-#             modules.scan_sms_fraud(folderPath, xmlDoc)
+#             scan_sms_fraud(folderPath, xmlDoc)
 #         case '2':
-#             modules.scan_spyware(folderPath, xmlDoc)
+#             scan_spyware(folderPath, xmlDoc)
 #         case _:
 #             print("Unrecognized module ID!")
 
@@ -113,7 +114,7 @@ try:
         if (inputExtension == 'xml'):
             xmlDoc = parse_xml(sys.argv[1])
             print_app_details(xmlDoc)
-            print_exported_components(xmlDoc)
+            print_app_components(xmlDoc)
 
         elif (inputExtension == 'apk'):
             outputPath = extract_files(sys.argv[1])
@@ -121,8 +122,8 @@ try:
             xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
             print_app_details(xmlDoc)
 
-            exportedComponents = get_exported_components(xmlDoc)
-            print_exported_components(exportedComponents)
+            appComponents = get_app_components(xmlDoc)
+            print_app_components(appComponents)
 
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
             start_initial_scan(outputPath)
