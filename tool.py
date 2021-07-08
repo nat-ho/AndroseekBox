@@ -4,7 +4,7 @@ import sys
 import subprocess
 import ntpath
 from modules.smsFraud import scan_sms_fraud
-# from modules.spyware import scan_spyware
+from modules.spyware import scan_spyware
 from libraries.xmlUtils import *
 from libraries.apkutils import *
 
@@ -79,6 +79,7 @@ def print_module_selection():
     print("Enter number to execute a module. \nType 'exit' to quit the application.")
     
     print("""\n1. SMS Fraud""")
+    print("""\n2. Spyware""")
 
 
 #Python 3.9 and below
