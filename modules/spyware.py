@@ -4,9 +4,12 @@ from pathlib import Path
 from libraries.xmlUtils import get_attribute_list
 
 
-foundImportList = []
-foundApiList = []
-foundPermissionList = []
+extractedScreenCaptureInfo = [[] for i in range(3)]
+extractedDeviceReconInfo = [[] for i in range(3)]
+extractedKeyloggerInfo = [[] for i in range(3)]
+extractedSLocationTrackingInfo = [[] for i in range(3)]
+extractedCameraRecordingInfo = [[] for i in range(3)]
+extractedClipboardTrackingInfo = [[] for i in range(3)]
 
 # SCREEN CAPTURE
 # createScreenCaptureIntent: Creates an intent in order to start screen capture
@@ -96,17 +99,18 @@ cameraRecordingPermissions = {
     "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.RECORD_AUDIO"
 }
 
-# CLIPBOARD INFORMATION TRACKING - No permission required to register a listener that can transmit device's clipboard to a remote server
+# CLIPBOARD TRACKING - No permission required to register a listener that can transmit device's clipboard to a remote server
 # hasPrimaryClip: App is checking if clipboard contains data
 # getPrimaryClip: App is retrieving text from the clipboard
 # hasText: Deprecated method since API level 11 for hasPrimaryClip()
 # getText: Deprecated method since API level 11 for getPrimaryClip()
-clipboardImports = {
+clipboardTrackingImports = {
     "android.content.ClipboardManager"
 }
-clipboardAPIs = {
+clipboardTrackingAPIs = {
     "hasPrimaryClip", "getPrimaryClip", "hasText", "getText"
 }
+
 
 def find_api_calls(filePath, sourcecode):
     try:
@@ -114,8 +118,18 @@ def find_api_calls(filePath, sourcecode):
         packageName = tree.package.name
 
         for path, node in tree.filter(javalang.tree.MethodInvocation):
-            if (node.member in (screenCaptureAPIs or deviceReconAPIs or keyloggerAPIs or locationTrackingAPIs or cameraRecordingAPIs or clipboardAPIs)):
-                foundApiList.append((filePath, packageName, node.member, node.position.line, node.position.column))
+            if (node.member in screenCaptureAPIs):
+                extractedScreenCaptureInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            elif (node.member in deviceReconAPIs):
+                extractedDeviceReconInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            elif (node.member in keyloggerAPIs):
+                extractedKeyloggerInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            elif (node.member in locationTrackingAPIs):
+                extractedSLocationTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            elif (node.member in cameraRecordingAPIs):
+                extractedCameraRecordingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            elif (node.member in clipboardTrackingAPIs):
+                extractedClipboardTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
 
     except Exception as e:
         print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
@@ -127,8 +141,18 @@ def find_imports(filePath, sourcecode):
         packageName = tree.package.name
 
         for path, node in tree.filter(javalang.tree.Import):
-            if (node.path in (screenCaptureImports or deviceReconImports or keyloggerImports or locationTrackingImports or cameraRecordingImports or clipboardImports)):
-                foundImportList.append((filePath, packageName, node.path, node.position.line, node.position.column))
+            if (node.path in screenCaptureImports):
+                extractedScreenCaptureInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            elif (node.path in deviceReconImports):
+                extractedDeviceReconInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            elif (node.path in keyloggerImports):
+                extractedKeyloggerInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            elif (node.path in locationTrackingImports):
+                extractedSLocationTrackingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            elif (node.path in cameraRecordingImports):
+                extractedCameraRecordingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            elif (node.path in clipboardTrackingImports):
+                extractedClipboardTrackingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
 
     except Exception as e:
         print("Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
@@ -136,90 +160,123 @@ def find_imports(filePath, sourcecode):
 
 def find_permissions(xmlDoc):
     try:
-
         tempPermissionList = get_attribute_list(xmlDoc, "uses-permission", "android:name")
 
         for permission in tempPermissionList:
-            if (permission in (screenCapturePermissions or deviceReconPermissions or keyloggerPermissions or locationTrackingPermissions or cameraRecordingPermissions)):
-                foundPermissionList.append(permission)
+            if (permission in screenCapturePermissions):
+                extractedScreenCaptureInfo[2].append(permission)
+            elif (permission in deviceReconPermissions):
+                extractedDeviceReconInfo[2].append(permission)
+            elif (permission in keyloggerPermissions):
+                extractedKeyloggerInfo[2].append(permission)
+            elif (permission in locationTrackingPermissions):
+                extractedSLocationTrackingInfo[2].append(permission)
+            elif (permission in cameraRecordingPermissions):
+                extractedCameraRecordingInfo[2].append(permission)
+
     except Exception as e:
         print("Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
 
 
+def print_list(info, type):
+    print("-" * 20 + type + "-" * 20)
+    filteredInfo = list(set(info))
+    for info in filteredInfo:
+        print(info)
+
+
+def print_all_information(extractedInfo):
+    for category, info in enumerate(extractedInfo):
+        if category == 0:
+            print_list(info, "Related API Calls")
+        elif category == 1:
+            print_list(info, "Related Class Imports")
+        elif category == 2:
+            print_list(info, "Related Permissions")
+    else:
+        print("No related API calls were found for screen capture")        
+
+
 def print_result():
-    global screenCaptureAPIs, deviceReconAPIs, keyloggerAPIs, locationTrackingAPIs, cameraRecordingAPIs, clipboardAPIs
-    global screenCaptureImports, deviceReconImports, keyloggerImports, locationTrackingImports, cameraRecordingImports, clipboardImports
-    global screenCapturePermissions, deviceReconPermissions, keyloggerPermissions, locationTrackingPermissions, cameraRecordingPermissions
+    global extractedScreenCaptureInfo, extractedDeviceReconInfo, extractedKeyloggerInfo, extractedSLocationTrackingInfo, extractedCameraRecordingInfo, extractedClipboardTrackingInfo
 
-    screenCaptureAPIs = list(set(screenCaptureAPIs))
-    deviceReconAPIs = list(set(deviceReconAPIs))
-    keyloggerAPIs = list(set(keyloggerAPIs))
-    locationTrackingAPIs = list(set(locationTrackingAPIs))
-    cameraRecordingAPIs = list(set(cameraRecordingAPIs))
-    clipboardAPIs = list(set(clipboardAPIs))
-
-    foundApiList = screenCaptureAPIs + deviceReconAPIs + keyloggerAPIs + locationTrackingAPIs + cameraRecordingAPIs + clipboardAPIs 
-
-    screenCaptureImports = list(set(screenCaptureImports))
-    deviceReconImports = list(set(deviceReconImports))
-    keyloggerImports = list(set(keyloggerImports))
-    locationTrackingImports = list(set(locationTrackingImports))
-    cameraRecordingImports = list(set(cameraRecordingImports))
-    clipboardImports = list(set(clipboardImports))
-       
-    foundImportList = screenCaptureImports + deviceReconImports + keyloggerImports + locationTrackingImports + cameraRecordingImports + clipboardImports
-
-    screenCapturePermissions = list(set(screenCapturePermissions))
-    deviceReconPermissions = list(set(deviceReconPermissions))
-    keyloggerPermissions = list(set(keyloggerPermissions))
-    locationTrackingPermissions = list(set(locationTrackingPermissions))
-    cameraRecordingPermissions = list(set(cameraRecordingPermissions))
-
-    foundPermissionList = screenCapturePermissions + deviceReconPermissions + keyloggerPermissions + locationTrackingPermissions + cameraRecordingPermissions
-
-    print("\n---------------------Related API Calls---------------------")
-    if (foundApiList):
-        print("\nList of API calls related to SMS fraud found in the application:")
-
-        for apiCallCount, apiCall in enumerate(foundApiList):
-            # print("{}.\tFile Path: {}".format(apiCallCount+1, apiCall[0]))
-            # print("\tPackage: {}".format(apiCall[1]))
-            # print("\tAPI Call: {}".format(apiCall[2]))
-            # print("\tLine Number & Column Number: ({}, {})".format(apiCall[3], apiCall[4]))
-            print(apiCall)
-            print("-" * 60)
+    # print("\n---------------------Related API Calls---------------------")
+    print("\nAPI calls related to screen capture Spyware")
+    if (extractedScreenCaptureInfo):
+        print_all_information(extractedScreenCaptureInfo)
     else:
-        print("No related API calls were found")
+        print("No related API calls were found for screen capture")
 
-    print("\n---------------------Related Library Imports---------------------")
-    if (foundImportList):
-        print("\nList of class imports related to SMS fraud found in the application:")
-
-        for importCount, classImport in enumerate(foundImportList):
-            # print("{}.\tFile Path: {}".format(importCount+1, classImport[0]))
-            # print("\tPackage: {}".format(classImport[1]))
-            # print("\tImport: {}".format(classImport[2]))
-            # print("\tLine Number & Column Number: ({}, {})".format(classImport[3], classImport[4]))
-            print(classImport)
-            print("-" * 60)
+    print("\nAPI calls related to device recon Spyware")
+    if (extractedDeviceReconInfo):
+        print_all_information(extractedDeviceReconInfo)
     else:
-        print("No related class imports were found")
+        print("No related API calls were found for device recon")
 
-    print("\n---------------------Related Permissions Declared---------------------")
-    if (foundPermissionList):
-        print("\nList of permissions related to SMS fraud found in the application:")
-
-        for permissionCount, permission in enumerate(foundPermissionList):
-            # print("-" * 40)
-            print("{}.\t{}".format(permissionCount+1, permission))
-        print("-" * 60)
+    print("\nAPI calls related to keylogger Spyware")
+    if (extractedKeyloggerInfo):
+        print_all_information(extractedKeyloggerInfo)
     else:
-        print("No related permissions were found")
+        print("No related API calls were found for keylogger")
+
+    print("\nAPI calls related to location tracking Spyware")
+    if (extractedSLocationTrackingInfo):
+        print_all_information(extractedSLocationTrackingInfo)
+    else:
+        print("No related API calls were found for location tracking")
+
+    print("\nAPI calls related to camera recording Spyware")
+    if (extractedCameraRecordingInfo):
+        print_all_information(extractedCameraRecordingInfo)
+    else:
+        print("No related API calls were found for camera recording")
+
+    print("\nAPI calls related to clipboard tracking Spyware")
+    if (extractedClipboardTrackingInfo):
+        print_all_information(extractedClipboardTrackingInfo)
+    else:
+        print("No related API calls were found for clipboard tracking")
+
+    # print("\n---------------------Related API Calls---------------------")
+    # if (foundApiList):
+    #     print("\nList of API calls related to SMS fraud found in the application:")
+
+    #     for apiCallCount, apiCall in enumerate(foundApiList):
+    #         print("{}.\tFile Path: {}".format(apiCallCount+1, apiCall[0]))
+    #         print("\tPackage: {}".format(apiCall[1]))
+    #         print("\tAPI Call: {}".format(apiCall[2]))
+    #         print("\tLine Number & Column Number: ({}, {})".format(apiCall[3], apiCall[4]))
+    #         print("-" * 60)
+    # else:
+    #     print("No related API calls were found")
+
+    # print("\n---------------------Related Library Imports---------------------")
+    # if (foundImportList):
+    #     print("\nList of class imports related to SMS fraud found in the application:")
+
+    #     for importCount, classImport in enumerate(foundImportList):
+    #         print("{}.\tFile Path: {}".format(importCount+1, classImport[0]))
+    #         print("\tPackage: {}".format(classImport[1]))
+    #         print("\tImport: {}".format(classImport[2]))
+    #         print("\tLine Number & Column Number: ({}, {})".format(classImport[3], classImport[4]))
+    #         print("-" * 60)
+    # else:
+    #     print("No related class imports were found")
+
+    # print("\n---------------------Related Permissions Declared---------------------")
+    # if (foundPermissionList):
+    #     print("\nList of permissions related to SMS fraud found in the application:")
+
+    #     for permissionCount, permission in enumerate(foundPermissionList):
+    #         # print("-" * 40)
+    #         print("{}.\t{}".format(permissionCount+1, permission))
+    #     print("-" * 60)
+    # else:
+    #     print("No related permissions were found")
 
 
 def scan_spyware(folderPath, xmlDoc):
     hasException = False
-
     for filePath in Path(folderPath).rglob('*.java'):
         try:
             with open(filePath) as file:
