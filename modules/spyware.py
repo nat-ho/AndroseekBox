@@ -1,4 +1,5 @@
 import javalang
+import re
 from threading import Thread
 from pathlib import Path
 from libraries.xmlUtils import get_attribute_list
@@ -130,7 +131,6 @@ def find_api_calls(filePath, sourcecode):
                 extractedCameraRecordingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
             elif (node.member in clipboardTrackingAPIs):
                 extractedClipboardTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-
     except Exception as e:
         print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
 
@@ -178,105 +178,155 @@ def find_permissions(xmlDoc):
         print("Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
 
 
-def print_list(info, type):
-    print("-" * 20 + type + "-" * 20)
-    filteredInfo = list(set(info))
-    for info in filteredInfo:
-        print(info)
-
-
-def print_all_information(extractedInfo):
-    for category, info in enumerate(extractedInfo):
-        if category == 0:
-            print_list(info, "Related API Calls")
-        elif category == 1:
-            print_list(info, "Related Class Imports")
-        elif category == 2:
-            print_list(info, "Related Permissions")
-    else:
-        print("No related API calls were found for screen capture")        
-
-
+# Print runner function
 def print_result():
     global extractedScreenCaptureInfo, extractedDeviceReconInfo, extractedKeyloggerInfo, extractedSLocationTrackingInfo, extractedCameraRecordingInfo, extractedClipboardTrackingInfo
 
-    # print("\n---------------------Related API Calls---------------------")
-    print("\nAPI calls related to screen capture Spyware")
+    print("-" * 40 + "Information related to screen capture Spyware" + "-" * 40)
     if (extractedScreenCaptureInfo):
         print_all_information(extractedScreenCaptureInfo)
     else:
         print("No related API calls were found for screen capture")
 
-    print("\nAPI calls related to device recon Spyware")
+    print("-" * 40 + "Information related to device recon Spyware" + "-" * 40)
     if (extractedDeviceReconInfo):
         print_all_information(extractedDeviceReconInfo)
     else:
         print("No related API calls were found for device recon")
 
-    print("\nAPI calls related to keylogger Spyware")
+    print("-" * 40 + "Information related to keylogger Spyware" + "-" * 40)
     if (extractedKeyloggerInfo):
         print_all_information(extractedKeyloggerInfo)
     else:
         print("No related API calls were found for keylogger")
 
-    print("\nAPI calls related to location tracking Spyware")
+    print("-" * 40 + "Information related to location tracking Spyware" + "-" * 40)
     if (extractedSLocationTrackingInfo):
         print_all_information(extractedSLocationTrackingInfo)
     else:
         print("No related API calls were found for location tracking")
 
-    print("\nAPI calls related to camera recording Spyware")
+    print("-" * 40 + "Information related to camera recording Spyware" + "-" * 40)
     if (extractedCameraRecordingInfo):
         print_all_information(extractedCameraRecordingInfo)
     else:
         print("No related API calls were found for camera recording")
 
-    print("\nAPI calls related to clipboard tracking Spyware")
+    print("-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40)
     if (extractedClipboardTrackingInfo):
         print_all_information(extractedClipboardTrackingInfo)
     else:
         print("No related API calls were found for clipboard tracking")
 
-    # print("\n---------------------Related API Calls---------------------")
-    # if (foundApiList):
-    #     print("\nList of API calls related to SMS fraud found in the application:")
 
-    #     for apiCallCount, apiCall in enumerate(foundApiList):
-    #         print("{}.\tFile Path: {}".format(apiCallCount+1, apiCall[0]))
-    #         print("\tPackage: {}".format(apiCall[1]))
-    #         print("\tAPI Call: {}".format(apiCall[2]))
-    #         print("\tLine Number & Column Number: ({}, {})".format(apiCall[3], apiCall[4]))
-    #         print("-" * 60)
-    # else:
-    #     print("No related API calls were found")
-
-    # print("\n---------------------Related Library Imports---------------------")
-    # if (foundImportList):
-    #     print("\nList of class imports related to SMS fraud found in the application:")
-
-    #     for importCount, classImport in enumerate(foundImportList):
-    #         print("{}.\tFile Path: {}".format(importCount+1, classImport[0]))
-    #         print("\tPackage: {}".format(classImport[1]))
-    #         print("\tImport: {}".format(classImport[2]))
-    #         print("\tLine Number & Column Number: ({}, {})".format(classImport[3], classImport[4]))
-    #         print("-" * 60)
-    # else:
-    #     print("No related class imports were found")
-
-    # print("\n---------------------Related Permissions Declared---------------------")
-    # if (foundPermissionList):
-    #     print("\nList of permissions related to SMS fraud found in the application:")
-
-    #     for permissionCount, permission in enumerate(foundPermissionList):
-    #         # print("-" * 40)
-    #         print("{}.\t{}".format(permissionCount+1, permission))
-    #     print("-" * 60)
-    # else:
-    #     print("No related permissions were found")
+def print_all_information(extractedInfo):
+    for category, infoList in enumerate(extractedInfo):
+        filteredInfo = list(set(infoList))
+        if category == 0:
+            print("-" * 20 + "[Related API Calls]" + "-" * 20)
+            print_apiCalls(filteredInfo)
+        elif category == 1:
+            print("-" * 20 + "[Related Class Imports]" + "-" * 20)
+            print_classImports(filteredInfo)
+        elif category == 2:
+            print("-" * 20 + "[Related Permissions]" + "-" * 20)
+            print_permissions(filteredInfo)
 
 
+def print_apiCalls(apiCalls):
+    if apiCalls:
+        for apiCallCount, apiCall in enumerate(apiCalls):
+            print("{}.\tAPI Call: {}".format(apiCallCount+1,apiCall[2]))
+            print("\tFile Path: {}".format(apiCall[0]))
+            print("\tPackage: {}".format(apiCall[1]))
+            print("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
+    else:
+        print("No related API Calls were found\n")
+
+
+def print_classImports(classImports):
+    if classImports:
+        for importCount, classImport in enumerate(classImports):
+            print("{}.\tImport: {}".format(importCount+1, classImport[2]))
+            print("\tFile Path: {}".format(classImport[0]))
+            print("\tPackage: {}".format(classImport[1]))
+            print("\tLine Number & Column Number: ({}, {})\n".format(classImport[3], classImport[4]))
+    else:
+        print("No related Class Imports were found\n")
+
+
+def print_permissions(permissions):
+    if permissions:
+        for permissionCount, permission in enumerate(permissions):
+            print("{}.\t{}\n".format(permissionCount+1, permission))
+    else:
+        print("No related Permissions were found\n")
+    print("\n")
+
+
+def keylogger_getText_falsePositive(apiCall):
+    if (apiCall == "getText"):
+        return False
+    return apiCall
+
+
+def keylogger_import_falsePositive(importClass):
+    if (importClass == "android.view.accessibility.AccessibilityNodeInfo" or 
+            importClass == "android.accessibilityservice.AccessibilityService"):
+        return False
+    return importClass
+
+
+def cameraRecording_startStop_falsePositive(apiCall):
+    if (apiCall == "start" or apiCall == "stop"):
+        return False
+    return apiCall
+
+
+def cameraRecording_read_falsePositive(apiCall):
+    if (apiCall == "read"):
+        return False
+    return apiCall
+
+
+def false_positive_cleanup():
+    global extractedKeyloggerInfo, extractedDeviceReconInfo, extractedCameraRecordingInfo
+
+    # Keylogger cleanup for getText() and AccessibilityNodeInfo & AccessibilityService
+    keyLoggerApiCalls = extractedKeyloggerInfo[0]
+    keyLoggerImports = extractedKeyloggerInfo[1]
+    keyLoggerPermissions = extractedKeyloggerInfo[2]
+
+    if "android.permission.BIND_ACCESSIBILITY_SERVICE" not in keyLoggerPermissions:
+        # Retain getText() and class imports only if required permission is present
+        keyLoggerApiCalls[:] = [apiCall for apiCall in keyLoggerApiCalls if keylogger_getText_falsePositive(apiCall[2])]
+        keyLoggerImports[:] = [importClass for importClass in keyLoggerImports if keylogger_import_falsePositive(importClass[2])]
+        extractedKeyloggerInfo[0] = keyLoggerApiCalls
+        extractedKeyloggerInfo[1] = keyLoggerImports
+
+    # CameraRecording cleanup for MediaRecorder start() & stop(), AudioRecord read()
+    cameraRecordingApiCalls = extractedCameraRecordingInfo[0]
+    cameraRecordingAPermissions = extractedCameraRecordingInfo[2]
+
+    cameraRecordingImports = []
+    for importClassTuple in extractedCameraRecordingInfo[1]:
+        # Extract all import classes from tuple (Path, Package, Import Class, Line, Column) for list comprehension
+        cameraRecordingImports.append(importClassTuple[2])
+
+    if ("android.media.MediaRecorder" not in cameraRecordingImports or "android.permission.CAMERA" not in cameraRecordingAPermissions):
+        # Retain start() and stop() only if required permission and class import are present
+        cameraRecordingApiCalls[:] = [apiCall for apiCall in cameraRecordingApiCalls if cameraRecording_startStop_falsePositive(apiCall[2])]
+    if ("android.media.AudioRecord" not in cameraRecordingImports or "android.permission.RECORD_AUDIO" not in cameraRecordingAPermissions):
+        # Retain read() only if required permission and class import are present
+        cameraRecordingApiCalls[:] = [apiCall for apiCall in cameraRecordingApiCalls if cameraRecording_read_falsePositive(apiCall[2])]
+    extractedCameraRecordingInfo[0] = cameraRecordingApiCalls
+
+
+# Main runner function
 def scan_spyware(folderPath, xmlDoc):
     hasException = False
+    find_permissions(xmlDoc)
+
     for filePath in Path(folderPath).rglob('*.java'):
         try:
             with open(filePath) as file:
@@ -298,9 +348,9 @@ def scan_spyware(folderPath, xmlDoc):
 
         except Exception as e:
             hasException = True
-        
-    find_permissions(xmlDoc)
-    
+
+    false_positive_cleanup()
+
     if hasException:
         print("Some results have been ommitted due to exceptions")
     print_result()

@@ -141,6 +141,6 @@ def print_deepLinks_map(deeplinks_r):
                     #deeplinks.append(value)
                     print("\t|-> " + value)
                     a = a+1
-            print("-" * 40 + "Total Deeplinks:{}".format(a) + "-" * 40 + "|")
+            print("-" * 38 + "Total Deeplinks:{}".format(a) + "-" * 38 + "|")
         except Exception as e:
             print(e)
