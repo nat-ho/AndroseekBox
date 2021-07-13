@@ -43,10 +43,10 @@ deviceReconPermissions = {
 # getText: Detects if Accessibility Service is used in conjunction with getText() method which can be used to log keystrokes to the console
 # https://stackoverflow.com/questions/27245185/android-key-logger
 keyloggerImports = {
-    "android.view.accessibility.AccessibilityNodeInfo", "android.accessibilityservice.AccessibilityService"
+    "android.view.accessibility.AccessibilityNodeInfo", "android.view.accessibility.AccessibilityEvent"
 }
 keyloggerAPIs = {
-    "getText"
+    "getText", "getEventType", "getAction"
 }
 keyloggerPermissions = {
     "android.permission.BIND_ACCESSIBILITY_SERVICE"
@@ -121,15 +121,15 @@ def find_api_calls(filePath, sourcecode):
         for path, node in tree.filter(javalang.tree.MethodInvocation):
             if (node.member in screenCaptureAPIs):
                 extractedScreenCaptureInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            elif (node.member in deviceReconAPIs):
+            if (node.member in deviceReconAPIs):
                 extractedDeviceReconInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            elif (node.member in keyloggerAPIs):
+            if (node.member in keyloggerAPIs):
                 extractedKeyloggerInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            elif (node.member in locationTrackingAPIs):
+            if (node.member in locationTrackingAPIs):
                 extractedSLocationTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            elif (node.member in cameraRecordingAPIs):
+            if (node.member in cameraRecordingAPIs):
                 extractedCameraRecordingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            elif (node.member in clipboardTrackingAPIs):
+            if (node.member in clipboardTrackingAPIs):
                 extractedClipboardTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
     except Exception as e:
         print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
@@ -264,27 +264,33 @@ def print_permissions(permissions):
     print("\n")
 
 
-def keylogger_getText_falsePositive(apiCall):
-    if (apiCall == "getText"):
+def cleanup_keylogger_apiCalls(apiCall):
+    if (apiCall == "getText" or apiCall == "getEventType" or apiCall == "getAction"):
         return False
     return apiCall
 
 
-def keylogger_import_falsePositive(importClass):
+def cleanup_keylogger_imports(importClass):
     if (importClass == "android.view.accessibility.AccessibilityNodeInfo" or 
-            importClass == "android.accessibilityservice.AccessibilityService"):
+            importClass == "android.view.accessibility.AccessibilityEvent"):
         return False
     return importClass
 
 
-def cameraRecording_startStop_falsePositive(apiCall):
+def cleanup_camRecord_apiCalls_startStop(apiCall):
     if (apiCall == "start" or apiCall == "stop"):
         return False
     return apiCall
 
 
-def cameraRecording_read_falsePositive(apiCall):
+def cleanup_camRecord_apiCalls_read(apiCall):
     if (apiCall == "read"):
+        return False
+    return apiCall
+
+
+def cleanup_clipboardTracking_apiCalls(apiCall):
+    if (apiCall == "hasText" or apiCall == "getText"):
         return False
     return apiCall
 
@@ -292,34 +298,43 @@ def cameraRecording_read_falsePositive(apiCall):
 def false_positive_cleanup():
     global extractedKeyloggerInfo, extractedDeviceReconInfo, extractedCameraRecordingInfo
 
-    # Keylogger cleanup for getText() and AccessibilityNodeInfo & AccessibilityService
-    keyLoggerApiCalls = extractedKeyloggerInfo[0]
-    keyLoggerImports = extractedKeyloggerInfo[1]
-    keyLoggerPermissions = extractedKeyloggerInfo[2]
+    # Keylogger cleanup for getText(), AccessibilityNodeInfo and AccessibilityService
+    foundKeyLoggerApiCalls = extractedKeyloggerInfo[0]
+    foundKeyLoggerImports = extractedKeyloggerInfo[1]
+    foundKeyLoggerPermissions = extractedKeyloggerInfo[2]
+    if "android.permission.BIND_ACCESSIBILITY_SERVICE" not in foundKeyLoggerPermissions:
+        # Retain getText(), getEventType(), getAction() and class imports only if required permission is present
+        foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_apiCalls(apiCall[2])]
+        foundKeyLoggerImports[:] = [importClass for importClass in foundKeyLoggerImports if cleanup_keylogger_imports(importClass[2])]
+        extractedKeyloggerInfo[0] = foundKeyLoggerApiCalls
+        extractedKeyloggerInfo[1] = foundKeyLoggerImports
 
-    if "android.permission.BIND_ACCESSIBILITY_SERVICE" not in keyLoggerPermissions:
-        # Retain getText() and class imports only if required permission is present
-        keyLoggerApiCalls[:] = [apiCall for apiCall in keyLoggerApiCalls if keylogger_getText_falsePositive(apiCall[2])]
-        keyLoggerImports[:] = [importClass for importClass in keyLoggerImports if keylogger_import_falsePositive(importClass[2])]
-        extractedKeyloggerInfo[0] = keyLoggerApiCalls
-        extractedKeyloggerInfo[1] = keyLoggerImports
-
-    # CameraRecording cleanup for MediaRecorder start() & stop(), AudioRecord read()
-    cameraRecordingApiCalls = extractedCameraRecordingInfo[0]
-    cameraRecordingAPermissions = extractedCameraRecordingInfo[2]
-
-    cameraRecordingImports = []
+    # Camera Recording cleanup for MediaRecorder start(), stop() and AudioRecord read()
+    foundCameraRecordingApiCalls = extractedCameraRecordingInfo[0]
+    foundCameraRecordingAPermissions = extractedCameraRecordingInfo[2]
+    foundCameraRecordingImports = []
     for importClassTuple in extractedCameraRecordingInfo[1]:
         # Extract all import classes from tuple (Path, Package, Import Class, Line, Column) for list comprehension
-        cameraRecordingImports.append(importClassTuple[2])
+        foundCameraRecordingImports.append(importClassTuple[2])
 
-    if ("android.media.MediaRecorder" not in cameraRecordingImports or "android.permission.CAMERA" not in cameraRecordingAPermissions):
+    if ("android.media.MediaRecorder" not in foundCameraRecordingImports or "android.permission.CAMERA" not in foundCameraRecordingAPermissions):
         # Retain start() and stop() only if required permission and class import are present
-        cameraRecordingApiCalls[:] = [apiCall for apiCall in cameraRecordingApiCalls if cameraRecording_startStop_falsePositive(apiCall[2])]
-    if ("android.media.AudioRecord" not in cameraRecordingImports or "android.permission.RECORD_AUDIO" not in cameraRecordingAPermissions):
+        foundCameraRecordingApiCalls[:] = [apiCall for apiCall in foundCameraRecordingApiCalls if cleanup_camRecord_apiCalls_startStop(apiCall[2])]
+    if ("android.media.AudioRecord" not in foundCameraRecordingImports or "android.permission.RECORD_AUDIO" not in foundCameraRecordingAPermissions):
         # Retain read() only if required permission and class import are present
-        cameraRecordingApiCalls[:] = [apiCall for apiCall in cameraRecordingApiCalls if cameraRecording_read_falsePositive(apiCall[2])]
-    extractedCameraRecordingInfo[0] = cameraRecordingApiCalls
+        foundCameraRecordingApiCalls[:] = [apiCall for apiCall in foundCameraRecordingApiCalls if cleanup_camRecord_apiCalls_read(apiCall[2])]
+    extractedCameraRecordingInfo[0] = foundCameraRecordingApiCalls
+
+    # Clipboard Tracking cleanup for hasText() and getText()
+    foundClipboardTrackingApiCalls = extractedClipboardTrackingInfo[0]
+    foundClipboardTrackingImports = []
+    for importClassTuple in extractedClipboardTrackingInfo[1]:
+        # Extract all import classes from tuple (Path, Package, Import Class, Line, Column) for list comprehension
+        foundClipboardTrackingImports.append(importClassTuple[2]) 
+    if ("android.content.ClipboardManager" not in foundClipboardTrackingImports):
+        # Retain hasText() and getText() only if required class import is present
+        foundClipboardTrackingApiCalls[:] = [apiCall for apiCall in foundClipboardTrackingApiCalls if cleanup_clipboardTracking_apiCalls(apiCall[2])]
+    extractedClipboardTrackingInfo[0] = foundClipboardTrackingApiCalls
 
 
 # Main runner function
