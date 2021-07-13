@@ -5,6 +5,7 @@ import subprocess
 import ntpath
 from modules.smsFraud import scan_sms_fraud
 from modules.spyware import scan_spyware
+from modules.backdoor import scan_backdoor
 from libraries.xmlUtils import *
 from libraries.apkutils import *
 
@@ -80,6 +81,7 @@ def print_module_selection():
     
     print("""\n1. SMS Fraud""")
     print("""\n2. Spyware""")
+    print("""\n3. Backdoor""")
 
 
 #Python 3.9 and below
@@ -87,6 +89,7 @@ def execute_module(userInput, folderPath, xmlDoc):
     switcher = {
         '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
         '2' : lambda : scan_spyware(folderPath, xmlDoc),
+        '3' : lambda : scan_backdoor(folderPath, xmlDoc),
         'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
@@ -99,6 +102,8 @@ def execute_module(userInput, folderPath, xmlDoc):
 #             scan_sms_fraud(folderPath, xmlDoc)
 #         case '2':
 #             scan_spyware(folderPath, xmlDoc)
+#         case '3':
+#             scan_backdoor(folderPath, xmlDoc)
 #         case _:
 #             print("Unrecognized module ID!")
 
