@@ -5,7 +5,7 @@ from threading import Thread
 urlRegEx = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+):?\d*)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
 ipRegEx = "\\b(?!(?:10\.|127\.|172\.(?:1[6-9]|2[0-9]|3[0-2])\.|192\.168\.))((?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2(?:[0-4][0-9]|5[0-4])|[0-1]?[0-9]?[0-9])))\\b"
 nativeLibraryLoadRegEx = "(System\.(loadLibrary|load)\(.*\))"
-nativeMethodRegEx = "^private\s|public\s.*native.*\(.*\)"
+nativeMethodRegEx = "(private|public)\sstatic\snative.*\(.*\)"
 
 urlList = []
 ipList = []
@@ -21,7 +21,7 @@ def extract_nativeLibraryLoading(file):
     nativeMethodsFound = re.findall(nativeMethodRegEx, file)
     if (len(nativeMethodsFound) != 0):
         for nativeMethod in nativeMethodsFound:
-            nativeMethodList.append(nativeMethod)
+            nativeMethodList.append(nativeMethod[0])
 
 
 def extract_urls(file):
