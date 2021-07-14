@@ -112,6 +112,7 @@ try:
 
     if (len(sys.argv[1:]) < 1):
         print_usage()
+        sys.exit("Please run the program again with the required files!")
     
     else:
         inputExtension = sys.argv[1].split('.')[-1]
@@ -139,6 +140,7 @@ try:
 
         else:
             print_usage()
+            sys.exit("Please run the program again with the required files!")
 
 except Exception as e:
     print(e)

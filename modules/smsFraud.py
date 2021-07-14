@@ -60,9 +60,9 @@ def print_result():
         print("\nList of API calls related to SMS fraud found in the application:")
 
         for apiCallCount, apiCall in enumerate(foundApiList):
-            print("{}.\tFile Path: {}".format(apiCallCount+1, apiCall[0]))
+            print("{}.\tAPI Call: {}".format(apiCallCount+1, apiCall[2]))
+            print("\tFile Path: {}".format(apiCall[0]))
             print("\tPackage: {}".format(apiCall[1]))
-            print("\tAPI Call: {}".format(apiCall[2]))
             print("\tLine Number & Column Number: ({}, {})".format(apiCall[3], apiCall[4]))
             print("-" * 60)
     else:
@@ -73,9 +73,9 @@ def print_result():
         print("\nList of class imports related to SMS fraud found in the application:")
 
         for importCount, classImport in enumerate(foundImportList):
-            print("{}.\tFile Path: {}".format(importCount+1, classImport[0]))
+            print("{}.\tImport: {}".format(importCount+1, classImport[2]))
+            print("\tFile Path: {}".format(classImport[0]))
             print("\tPackage: {}".format(classImport[1]))
-            print("\tImport: {}".format(classImport[2]))
             print("\tLine Number & Column Number: ({}, {})".format(classImport[3], classImport[4]))
             print("-" * 60)
     else:
@@ -95,6 +95,7 @@ def print_result():
 
 def scan_sms_fraud(folderPath, xmlDoc):
     hasException = False
+    find_permissions(xmlDoc)
 
     for filePath in Path(folderPath).rglob('*.java'):
         try:
@@ -117,8 +118,6 @@ def scan_sms_fraud(folderPath, xmlDoc):
 
         except Exception as e:
             hasException = True
-        
-    find_permissions(xmlDoc)
     
     if hasException:
         print("Some results have been ommitted due to exceptions")
