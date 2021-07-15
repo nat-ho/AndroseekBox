@@ -3,7 +3,8 @@ import os
 import sys
 import subprocess
 import ntpath
-from modules.smsFraud import scan_sms_fraud
+from modules.sms_fraud import scan_sms_fraud
+from modules.click_fraud import scan_click_fraud
 from modules.spyware import scan_spyware
 from modules.backdoor import scan_backdoor
 from libraries.xmlUtils import *
@@ -80,29 +81,33 @@ def print_module_selection():
     print("Enter number to execute a module. \nType 'exit' to quit the application.")
     
     print("""\n1. SMS Fraud""")
-    print("""\n2. Spyware""")
-    print("""\n3. Backdoor""")
+    print("""\n2. Click Fraud""")
+    print("""\n3. Spyware""")
+    print("""\n4. Backdoor""")
 
 
 #Python 3.9 and below
 def execute_module(userInput, folderPath, xmlDoc):
     switcher = {
         '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
-        '2' : lambda : scan_spyware(folderPath, xmlDoc),
-        '3' : lambda : scan_backdoor(folderPath, xmlDoc),
+        '2' : lambda : scan_click_fraud(folderPath, xmlDoc),
+        '3' : lambda : scan_spyware(folderPath, xmlDoc),
+        '4' : lambda : scan_backdoor(folderPath, xmlDoc),
         'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
 
 
-#Python 3.10 and above
+# #Python 3.10 and above
 # def execute_module(userInput):
 #     match userInput:
 #         case '1':
 #             scan_sms_fraud(folderPath, xmlDoc)
 #         case '2':
-#             scan_spyware(folderPath, xmlDoc)
+#             scan_click_fraud(folderPath, xmlDoc)
 #         case '3':
+#             scan_spyware(folderPath, xmlDoc)
+#         case '4':
 #             scan_backdoor(folderPath, xmlDoc)
 #         case _:
 #             print("Unrecognized module ID!")
