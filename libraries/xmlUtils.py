@@ -33,13 +33,14 @@ def get_app_components(xmlDoc):
         node = xmlDoc.getElementsByTagName(component)
 
         for atr in node:
+            fullComponentName = component + ": \t" + atr.getAttribute("android:name")
             if "true" in atr.getAttribute("android:exported"):
-                applicationComponents.append(component + ": \t" + atr.getAttribute("android:name") + "(EXPORTED)")
+                applicationComponents.append((fullComponentName,"Exported"))
             
             elif atr.getElementsByTagName("intent-filter") and atr.getAttribute("android:name") not in applicationComponents:
-                applicationComponents.append(component + ": \t" + atr.getAttribute("android:name") + "(EXPORTED)")
+                applicationComponents.append((fullComponentName,"Exported"))
             else:
-                applicationComponents.append(component + ": \t" + atr.getAttribute("android:name"))
+                applicationComponents.append((fullComponentName,"notExported"))
 
     return applicationComponents
 

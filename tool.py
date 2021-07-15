@@ -76,8 +76,10 @@ def print_app_details(xmlDoc):
 def print_app_components(appComponents):
     print(Fore.CYAN + Style.BRIGHT + "---------------------Application Components---------------------\n")
     for appComponent in appComponents:
-        if (appComponent):
-            print(appComponent)
+        if (appComponent[1] == "Exported"):
+            print("{}\t{}".format(appComponent[0], Fore.YELLOW + Style.BRIGHT + "\t(Exported)"))
+        else:
+            print(appComponent[0])
 
 
 def print_module_selection():
