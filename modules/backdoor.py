@@ -1,4 +1,6 @@
 import javalang
+import colorama
+from colorama import init, Fore, Style
 from pathlib import Path
 from libraries.xmlUtils import get_attribute_list
 
@@ -39,7 +41,7 @@ def find_api_calls(filePath, sourcecode):
                 foundBackdoorApiList.append((filePath, packageName, node.name, node.position.line, node.position.column))
         
     except Exception as e:
-        print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
+        print(Fore.YELLOW + "Exception occured when parsing {} for API calls : :{}".format(filePath, e))
 
 
 def find_permissions(xmlDoc):
@@ -49,7 +51,7 @@ def find_permissions(xmlDoc):
             if (permission in backdoorPermissionList):
                 foundPermissionList.append(permission)
     except Exception as e:
-        print("Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
+        print(Fore.YELLOW + "Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
 
 
 def print_result():
@@ -57,26 +59,22 @@ def print_result():
     foundBackdoorApiList = list(set(foundBackdoorApiList))
     foundPermissionList = list(set(foundPermissionList))
 
-    print("\n---------------------Related API Calls---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related API Calls---------------------")
     if (foundBackdoorApiList):
-        print("\nList of API calls related to backdoor found in the application:")
-
         for apiCallCount, apiCall in enumerate(foundBackdoorApiList):
             print("{}.\tAPI Call: {}".format(apiCallCount+1, apiCall[2]))
             print("\tFile Path: {}".format(apiCall[0]))
             print("\tPackage: {}".format(apiCall[1]))
             print("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
     else:
-        print("No related API calls were found")
+        print(Fore.YELLOW + "No related API calls were found")
 
-    print("\n---------------------Related Permissions Declared---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related Permissions Declared---------------------")
     if (foundPermissionList):
-        print("\nList of permissions related to backdoor found in the application:")
-
         for permissionCount, permission in enumerate(foundPermissionList):
             print("{}.\t{}".format(permissionCount+1, permission))
     else:
-        print("No related permissions were found")
+        print(Fore.YELLOW + "No related permissions were found")
 
 
 def scan_backdoor(folderPath, xmlDoc):
@@ -95,6 +93,6 @@ def scan_backdoor(folderPath, xmlDoc):
             hasException = True
     
     if hasException:
-        print("Some results have been ommitted due to exceptions")
+        print(Fore.YELLOW + "Some results have been ommitted due to exceptions")
 
     print_result()

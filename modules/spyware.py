@@ -1,5 +1,7 @@
 import javalang
 import re
+import colorama
+from colorama import init, Fore, Style
 from threading import Thread
 from pathlib import Path
 from libraries.xmlUtils import get_attribute_list
@@ -132,7 +134,7 @@ def find_api_calls(filePath, sourcecode):
             if (node.member in clipboardTrackingAPIs):
                 extractedClipboardTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
     except Exception as e:
-        print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
+        print(Fore.YELLOW + "Exception occured when parsing {} for API calls : :{}".format(filePath, e))
 
 
 def find_imports(filePath, sourcecode):
@@ -155,7 +157,7 @@ def find_imports(filePath, sourcecode):
                 extractedClipboardTrackingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
 
     except Exception as e:
-        print("Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
+        print(Fore.YELLOW + "Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
 
 
 def find_permissions(xmlDoc):
@@ -175,61 +177,49 @@ def find_permissions(xmlDoc):
                 extractedCameraRecordingInfo[2].append(permission)
 
     except Exception as e:
-        print("Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
+        print(Fore.YELLOW + "Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
 
 
 # Print runner function
 def print_result():
     global extractedScreenCaptureInfo, extractedDeviceReconInfo, extractedKeyloggerInfo, extractedSLocationTrackingInfo, extractedCameraRecordingInfo, extractedClipboardTrackingInfo
 
-    print("-" * 40 + "Information related to screen capture Spyware" + "-" * 40)
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to screen capture Spyware" + "-" * 40)
     if (extractedScreenCaptureInfo):
         print_all_information(extractedScreenCaptureInfo)
-    else:
-        print("No related API calls were found for screen capture")
 
-    print("-" * 40 + "Information related to device recon Spyware" + "-" * 40)
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to device recon Spyware" + "-" * 40)
     if (extractedDeviceReconInfo):
         print_all_information(extractedDeviceReconInfo)
-    else:
-        print("No related API calls were found for device recon")
 
-    print("-" * 40 + "Information related to keylogger Spyware" + "-" * 40)
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40)
     if (extractedKeyloggerInfo):
         print_all_information(extractedKeyloggerInfo)
-    else:
-        print("No related API calls were found for keylogger")
 
-    print("-" * 40 + "Information related to location tracking Spyware" + "-" * 40)
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to location tracking Spyware" + "-" * 40)
     if (extractedSLocationTrackingInfo):
         print_all_information(extractedSLocationTrackingInfo)
-    else:
-        print("No related API calls were found for location tracking")
 
-    print("-" * 40 + "Information related to camera recording Spyware" + "-" * 40)
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40)
     if (extractedCameraRecordingInfo):
         print_all_information(extractedCameraRecordingInfo)
-    else:
-        print("No related API calls were found for camera recording")
 
-    print("-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40)
+    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40)
     if (extractedClipboardTrackingInfo):
         print_all_information(extractedClipboardTrackingInfo)
-    else:
-        print("No related API calls were found for clipboard tracking")
-
+   
 
 def print_all_information(extractedInfo):
     for category, infoList in enumerate(extractedInfo):
         filteredInfo = list(set(infoList))
         if category == 0:
-            print("-" * 20 + "[Related API Calls]" + "-" * 20)
+            print(Fore.GREEN + "[Related API Calls]")
             print_apiCalls(filteredInfo)
         elif category == 1:
-            print("-" * 20 + "[Related Class Imports]" + "-" * 20)
+            print(Fore.GREEN + "[Related Class Imports]")
             print_classImports(filteredInfo)
         elif category == 2:
-            print("-" * 20 + "[Related Permissions]" + "-" * 20)
+            print(Fore.GREEN + "[Related Permissions]")
             print_permissions(filteredInfo)
 
 
@@ -241,7 +231,7 @@ def print_apiCalls(apiCalls):
             print("\tPackage: {}".format(apiCall[1]))
             print("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
     else:
-        print("No related API Calls were found\n")
+        print(Fore.YELLOW + "No related API Calls were found\n")
 
 
 def print_classImports(classImports):
@@ -252,7 +242,7 @@ def print_classImports(classImports):
             print("\tPackage: {}".format(classImport[1]))
             print("\tLine Number & Column Number: ({}, {})\n".format(classImport[3], classImport[4]))
     else:
-        print("No related Class Imports were found\n")
+        print(Fore.YELLOW + "No related Class Imports were found\n")
 
 
 def print_permissions(permissions):
@@ -260,7 +250,7 @@ def print_permissions(permissions):
         for permissionCount, permission in enumerate(permissions):
             print("{}.\t{}\n".format(permissionCount+1, permission))
     else:
-        print("No related Permissions were found\n")
+        print(Fore.YELLOW + "No related Permissions were found\n")
     print("\n")
 
 
@@ -359,7 +349,7 @@ def scan_spyware(folderPath, xmlDoc):
                 thread2.join()
                 
             except Exception as e:
-                print("Error spawing threads")
+                print(Fore.RED + "Error spawing threads")
 
         except Exception as e:
             hasException = True
@@ -367,5 +357,5 @@ def scan_spyware(folderPath, xmlDoc):
     false_positive_cleanup()
 
     if hasException:
-        print("Some results have been ommitted due to exceptions")
+        print(Fore.YELLOW + "Some results have been ommitted due to exceptions")
     print_result()

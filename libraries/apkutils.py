@@ -1,11 +1,13 @@
 import os
 import re
+import colorama
+from colorama import init, Fore, Style
 from threading import Thread
 
 urlRegEx = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+):?\d*)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
 ipRegEx = "\\b(?!(?:10\.|127\.|172\.(?:1[6-9]|2[0-9]|3[0-2])\.|192\.168\.))((?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2(?:[0-4][0-9]|5[0-4])|[0-1]?[0-9]?[0-9])))\\b"
 nativeLibraryLoadRegEx = "(System\.(loadLibrary|load)\(.*\))"
-nativeMethodRegEx = "(private|public)\sstatic\snative.*\(.*\)"
+nativeMethodRegEx = "((private|public)\sstatic\snative.*\(.*\))"
 
 urlList = []
 ipList = []
@@ -52,33 +54,29 @@ def print_result():
     nativeLibraryList = list(set(nativeLibraryList))
     nativeMethodList = list(set(nativeMethodList))
 
-    print("\n---------------------URLs---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------URLs---------------------\n")
     if (urlList):
-        print("List of URLs found in the application")
         print_list(urlList)
     else:
-        print("No URL was found")
+        print(Fore.YELLOW + "No URL was found")
 
-    print("\n---------------------IP Addresses---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------IP Addresses---------------------\n")
     if (ipList):
-        print("List of IP addresses found in the application")
         print_list(ipList)
     else:
-        print("No IP address were found")
+        print(Fore.YELLOW + "No IP address were found")
     
-    print("\n---------------------Native Libraries Loaded---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Native Libraries Loaded---------------------\n")
     if (nativeLibraryList):
-        print("List loaded native libraries found in the application")
         print_list(nativeLibraryList)
     else:
-        print("No native libraries were loaded")
+        print(Fore.YELLOW + "No native libraries were loaded")
     
-    print("\n---------------------Native Methods---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Native Methods---------------------\n")
     if (nativeMethodList):
-        print("List of native methods found in the application")
         print_list(nativeMethodList)
     else:
-        print("No native methods were found")
+        print(Fore.YELLOW + "No native methods were found")
 
 def start_initial_scan(folderPath):
     hasException = False
@@ -105,8 +103,8 @@ def start_initial_scan(folderPath):
                 thread2.join()
                 thread3.join()
             except Exception as e:
-                print("Error spawning threads")
+                print(Fore.RED + "Error spawning threads")
 
     if hasException:
-        print("Some results have have been ommitted due to exceptions")
+        print(Fore.YELLOW + "Some results have have been ommitted due to exceptions")
     print_result()

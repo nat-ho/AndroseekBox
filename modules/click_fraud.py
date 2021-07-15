@@ -1,4 +1,6 @@
 import javalang
+import colorama
+from colorama import init, Fore, Style
 from threading import Thread
 from pathlib import Path
 from libraries.xmlUtils import get_attribute_list
@@ -40,7 +42,7 @@ def find_api_calls(filePath, sourcecode):
                 foundApiList.append((filePath, packageName, node.member, node.position.line, node.position.column))
 
     except Exception as e:
-        print("Exception occured when parsing {} for API calls : :{}".format(filePath, e))
+        print(Fore.YELLOW + "Exception occured when parsing {} for API calls : :{}".format(filePath, e))
 
 
 def find_imports(filePath, sourcecode):
@@ -53,7 +55,7 @@ def find_imports(filePath, sourcecode):
                 foundImportList.append((filePath, packageName, node.path, node.position.line, node.position.column))
 
     except Exception as e:
-        print("Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
+        print(Fore.YELLOW + "Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
 
 
 def print_result():
@@ -61,31 +63,25 @@ def print_result():
     foundApiList = list(set(foundApiList))
     foundImportList = list(set(foundImportList))
 
-    print("\n---------------------Related API Calls---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related API Calls---------------------")
     if (foundApiList):
-        print("\nList of API calls related to Click fraud found in the application:")
-
         for apiCallCount, apiCall in enumerate(foundApiList):
             print("{}.\tAPI Call: {}".format(apiCallCount+1, apiCall[2]))
             print("\tFile Path: {}".format(apiCall[0]))
             print("\tPackage: {}".format(apiCall[1]))
-            print("\tLine Number & Column Number: ({}, {})".format(apiCall[3], apiCall[4]))
-            print("-" * 60)
+            print("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
     else:
-        print("No related API calls were found")
+        print(Fore.YELLOW + "No related API calls were found")
 
-    print("\n---------------------Related Library Imports---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related Library Imports---------------------")
     if (foundImportList):
-        print("\nList of class imports related to Click fraud found in the application:")
-
         for importCount, classImport in enumerate(foundImportList):
             print("{}.\tImport: {}".format(importCount+1, classImport[2]))
             print("\tFile Path: {}".format(classImport[0]))
             print("\tPackage: {}".format(classImport[1]))
-            print("\tLine Number & Column Number: ({}, {})".format(classImport[3], classImport[4]))
-            print("-" * 60)
+            print("\tLine Number & Column Number: ({}, {})\n".format(classImport[3], classImport[4]))
     else:
-        print("No related class imports were found")
+        print(Fore.YELLOW + "No related class imports were found")
 
 
 def scan_click_fraud(folderPath, xmlDoc):
@@ -109,11 +105,11 @@ def scan_click_fraud(folderPath, xmlDoc):
                 thread2.join()
                 
             except Exception as e:
-                print("Error spawing threads")
+                print(Fore.RED + "Error spawing threads")
 
         except Exception as e:
             hasException = True
     
     if hasException:
-        print("Some results have been ommitted due to exceptions")
+        print(Fore.YELLOW + "Some results have been ommitted due to exceptions")
     print_result()

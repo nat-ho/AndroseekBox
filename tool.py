@@ -3,6 +3,8 @@ import os
 import sys
 import subprocess
 import ntpath
+import colorama
+from colorama import init, Fore, Style
 from modules.sms_fraud import scan_sms_fraud
 from modules.click_fraud import scan_click_fraud
 from modules.spyware import scan_spyware
@@ -10,9 +12,10 @@ from modules.backdoor import scan_backdoor
 from libraries.xmlUtils import *
 from libraries.apkutils import *
 
+colorama.init(autoreset=True)
 
 def print_usage():
-    print("""---------------------USAGE---------------------
+    print(Fore.YELLOW + """---------------------USAGE---------------------
     ./tool.py path_to_AndroidManifest.xml
     ./tool.py path_to_APKFile.APK
     """)
@@ -28,7 +31,7 @@ def extract_files(apkLocation):
 
     # If files exist, provide user to continue or re unpack APK
     if (os.path.isdir(folderPath)):
-        reUnpack = input("Files already exist, do you wish to re unpack APK? (Y/N)")
+        reUnpack = input(Fore.YELLOW + "Files already exist, do you wish to re unpack APK? (Y/N)")
         if (reUnpack.upper() == "Y"):
             subprocess.run("rm -r " + folderPath, shell=True)
         elif (reUnpack.upper() == "N"):
@@ -36,7 +39,7 @@ def extract_files(apkLocation):
         else:
             extract_files(userInput)
     
-    print("APK given as input \nUnpacking now")
+    print(Fore.GREEN + Style.BRIGHT + "APK given as input \nUnpacking now")
     jadx = os.getcwd() + "/dependencies/jadx-1.2.0/bin/jadx"
     # subprocess.run("mkdir -p " + folderPath, shell=True)
     subprocess.run(jadx + " -d {} {}".format(folderPath, apkLocation), shell=True)
@@ -50,7 +53,8 @@ def get_xmlDoc(apkLocation):
 
     
 def print_app_details(xmlDoc):
-    print("""\n---------------------Application Details---------------------
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Application Details---------------------")
+    print ("""
     Name            :{}
     Version Code    :{}
     Version Name    :{}
@@ -70,21 +74,20 @@ def print_app_details(xmlDoc):
 
 
 def print_app_components(appComponents):
-    print("---------------------Application Components---------------------")
+    print(Fore.CYAN + Style.BRIGHT + "---------------------Application Components---------------------\n")
     for appComponent in appComponents:
         if (appComponent):
             print(appComponent)
 
 
 def print_module_selection():
-    print("\n---------------------Module Selection---------------------")
-    print("Enter number to execute a module. \nType 'exit' to quit the application.")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Module Selection---------------------\n")
+    print("""Enter number to execute a module. \nType 'exit' to quit the application.
+    1. SMS Fraud
+    2. Click Fraud
+    3. Spyware
+    4. Backdoor""")
     
-    print("""\n1. SMS Fraud""")
-    print("""\n2. Click Fraud""")
-    print("""\n3. Spyware""")
-    print("""\n4. Backdoor""")
-
 
 #Python 3.9 and below
 def execute_module(userInput, folderPath, xmlDoc):
@@ -93,7 +96,7 @@ def execute_module(userInput, folderPath, xmlDoc):
         '2' : lambda : scan_click_fraud(folderPath, xmlDoc),
         '3' : lambda : scan_spyware(folderPath, xmlDoc),
         '4' : lambda : scan_backdoor(folderPath, xmlDoc),
-        'default' : lambda : print("\nUnrecognized module ID! Please enter again.")
+        'default' : lambda : print(Fore.RED + "\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
 
@@ -110,14 +113,14 @@ def execute_module(userInput, folderPath, xmlDoc):
 #         case '4':
 #             scan_backdoor(folderPath, xmlDoc)
 #         case _:
-#             print("Unrecognized module ID!")
+#             print(Fore.RED + "Unrecognized module ID!")
 
 
 try:
 
     if (len(sys.argv[1:]) < 1):
         print_usage()
-        sys.exit("Please run the program again with the required files!")
+        sys.exit(Fore.RED + "Please run the program again with the required files!")
     
     else:
         inputExtension = sys.argv[1].split('.')[-1]
@@ -145,10 +148,10 @@ try:
 
         else:
             print_usage()
-            sys.exit("Please run the program again with the required files!")
+            sys.exit(Fore.RED + "Please run the program again with the required files!")
 
 except Exception as e:
-    print(e)
+    print(Fore.RED + e)
 
 print_module_selection()
 userInput = input("\nModule: ")
@@ -161,4 +164,4 @@ while (userInput.lower() != "exit"):
     print_module_selection()
     userInput = input("\nEnter another module: ")
 
-print("\nGoodbye!")
+print(Fore.CYAN + "\nGoodbye!")

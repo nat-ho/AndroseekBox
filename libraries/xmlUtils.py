@@ -1,4 +1,6 @@
 from xml.dom import minidom
+import colorama
+from colorama import init, Fore, Style
 import xml.etree.ElementTree as tree
 
 def parse_xml(xml):
@@ -133,7 +135,7 @@ def get_deeplinks(xmlDoc):
 def print_deepLinks_map(deeplinks_r):
         deeplinks = deeplinks_r
         a = 0
-        print("\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":")
+        print(Fore.CYAN + Style.BRIGHT + "\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":")
         try:
             for key in deeplinks:
                 print("Deeplinks that trigger: " + key)
@@ -141,6 +143,6 @@ def print_deepLinks_map(deeplinks_r):
                     #deeplinks.append(value)
                     print("\t|-> " + value)
                     a = a+1
-            print("-" * 38 + "Total Deeplinks:{}".format(a) + "-" * 38 + "|")
+            print(Fore.CYAN + Style.BRIGHT + "-" * 38 + "Total Deeplinks:{}".format(a) + "-" * 38 + "|")
         except Exception as e:
             print(e)
