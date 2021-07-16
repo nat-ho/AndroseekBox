@@ -10,7 +10,7 @@ from modules.click_fraud import scan_click_fraud
 from modules.spyware import scan_spyware
 from modules.backdoor import scan_backdoor
 from libraries.xmlUtils import *
-from libraries.apkutils import *
+from libraries.apkUtils import *
 
 colorama.init(autoreset=True)
 
