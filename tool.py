@@ -91,7 +91,7 @@ def print_module_selection():
     4. Backdoor""")
     
 
-#Python 3.9 and below
+# Python 3.9 and below
 def execute_module(userInput, folderPath, xmlDoc):
     switcher = {
         '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
@@ -103,7 +103,7 @@ def execute_module(userInput, folderPath, xmlDoc):
     return switcher.get(userInput, switcher.get('default'))()
 
 
-# #Python 3.10 and above
+# Python 3.10 and above
 # def execute_module(userInput):
 #     match userInput:
 #         case '1':
