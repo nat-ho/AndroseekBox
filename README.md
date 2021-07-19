@@ -9,8 +9,7 @@ code making it harder to analyse even when decompiled.
 
 `AndroseekBox` attempts to help address some of these issues by automating processes such as extracting APK information, 
 app components, URLs and IP addresses found in the source code. It also has static analysis `modules` that identify 
-common API calls and permissions used for the different malware categories found in Google Play Protect 
-(https://developers.google.com/android/play-protect/phacategories#spyware). Built with a modular approach that is easy 
+common API calls and permissions used for the different malware categories found in [Google Play Protect](https://developers.google.com/android/play-protect/phacategories). Built with a modular approach that is easy 
 add on or modify, this tool aims to greatly reduce the time and effort needed to conduct static analysis so that you can 
 focus on uncovering information in the right areas.
 
