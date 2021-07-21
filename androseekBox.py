@@ -3,6 +3,7 @@ import os
 import sys
 import subprocess
 import ntpath
+import shutil
 import colorama
 from colorama import init, Fore, Style
 from modules.sms_fraud import scan_sms_fraud
@@ -46,6 +47,10 @@ def extract_files(apkLocation):
 
     return folderPath
 
+def moveZipToOutput(zipLocation):
+    newZipPath = "OutputAPKs/" + zipLocation
+    shutil.move(zipLocation, newZipPath)
+    return newZipPath
 
 def get_xmlDoc(apkLocation):
     xmlDoc = parse_xml(get_folder_path(apkLocation) + "/resources/AndroidManifest.xml")
@@ -117,6 +122,7 @@ def execute_module(userInput, folderPath, xmlDoc):
 #         case _:
 #             print(Fore.RED + "Unrecognized module ID!")
 
+apkOrZip = False
 
 try:
 
@@ -129,12 +135,21 @@ try:
         appName = sys.argv[1].split('.')[0]
         
         if (inputExtension == 'xml'):
+            print("XML file given as input. File be parsed as AndroidManifest")
+
             xmlDoc = parse_xml(sys.argv[1])
             print_app_details(xmlDoc)
-            print_app_components(xmlDoc)
 
-        elif (inputExtension == 'apk'):
-            outputPath = extract_files(sys.argv[1])
+            appComponents = get_app_components(xmlDoc)
+            print_app_components(appComponents)
+
+        elif (inputExtension == 'apk' or os.path.isdir(sys.argv[1])):
+            if (inputExtension == 'apk'):
+                outputPath = extract_files(sys.argv[1])
+            else:
+                outputPath = moveZipToOutput(sys.argv[1])
+
+            apkOrZip = True
 
             xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
             print_app_details(xmlDoc)
@@ -147,7 +162,7 @@ try:
 
             deeplinks = get_deeplinks(xmlDoc)
             print_deepLinks_map(deeplinks)
-
+        
         else:
             print_usage()
             sys.exit(Fore.RED + "Please run the program again with the required files!")
@@ -155,15 +170,16 @@ try:
 except Exception as e:
     print(Fore.RED + e)
 
-print_module_selection()
-userInput = input("\nModule: ")
-
-while (userInput.lower() != "exit"):
-    folderPath = get_folder_path(sys.argv[1])
-    xmlDoc = get_xmlDoc(sys.argv[1])
-    execute_module(userInput, folderPath, xmlDoc)
-
+if (apkOrZip == True):
     print_module_selection()
-    userInput = input("\nEnter another module: ")
+    userInput = input("\nModule: ")
 
-print(Fore.CYAN + "\nGoodbye!")
+    while (userInput.lower() != "exit"):
+        folderPath = get_folder_path(sys.argv[1])
+        xmlDoc = get_xmlDoc(sys.argv[1])
+        execute_module(userInput, folderPath, xmlDoc)
+
+        print_module_selection()
+        userInput = input("\nEnter another module: ")
+
+    print(Fore.CYAN + "\nGoodbye!")
