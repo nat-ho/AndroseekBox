@@ -27,7 +27,7 @@ def get_attribute_list(xmlDoc, node, attribute):
 
 def get_app_components(xmlDoc):
     components = ["activity", "activity-alias", "service", "receiver", "provider"]
-    applicationComponents = []
+    appComponents = []
 
     for component in components:
         node = xmlDoc.getElementsByTagName(component)
@@ -35,15 +35,20 @@ def get_app_components(xmlDoc):
         for atr in node:
             fullComponentName = component + ": \t" + atr.getAttribute("android:name")
             if "true" in atr.getAttribute("android:exported"):
-                applicationComponents.append((fullComponentName,"Exported"))
+                appComponents.append((fullComponentName,"Exported"))
             
-            elif atr.getElementsByTagName("intent-filter") and atr.getAttribute("android:name") not in applicationComponents:
-                applicationComponents.append((fullComponentName,"Exported"))
+            elif atr.getElementsByTagName("intent-filter") and atr.getAttribute("android:name") not in appComponents:
+                appComponents.append((fullComponentName,"Exported"))
             else:
-                applicationComponents.append((fullComponentName,"notExported"))
+                appComponents.append((fullComponentName,"notExported"))
+    return appComponents
 
-    return applicationComponents
-
+def get_app_permissions(xmlDoc):
+    appPermissions = []
+    node = xmlDoc.getElementsByTagName('uses-permission')
+    for atr in node:
+        appPermissions.append(atr.getAttribute("android:name"))
+    return appPermissions
 
 def parse_xml_strings(xmlDoc):
     strings = []

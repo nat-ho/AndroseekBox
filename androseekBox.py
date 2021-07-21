@@ -8,7 +8,7 @@ import colorama
 from colorama import init, Fore, Style
 from modules.sms_fraud import scan_sms_fraud
 from modules.click_fraud import scan_click_fraud
-from modules.spyware import scan_spyware
+from modules.spyware import print_permissions, scan_spyware
 from modules.backdoor import scan_backdoor
 from libraries.xmlUtils import *
 from libraries.apkUtils import *
@@ -87,6 +87,12 @@ def print_app_components(appComponents):
             print(appComponent[0])
 
 
+def print_app_permissions(appPermissions):
+    print(Fore.CYAN + Style.BRIGHT + "---------------------Application Permissions---------------------\n")
+    for appPermission in appPermissions:
+        print(appPermission)
+
+
 def print_module_selection():
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Module Selection---------------------\n")
     print("""Enter number to execute a module. \nType 'exit' to quit the application.
@@ -156,6 +162,9 @@ try:
 
             appComponents = get_app_components(xmlDoc)
             print_app_components(appComponents)
+
+            appPermissions = get_app_permissions(xmlDoc)
+            print_app_permissions(appPermissions)
 
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
             start_initial_scan(outputPath)
