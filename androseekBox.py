@@ -52,14 +52,26 @@ def moveZipToOutput(zipLocation):
     shutil.move(zipLocation, newZipPath)
     return newZipPath
 
+
+def create_output_file(outputApkPath, appName):
+    outputFileName = appName + "_output.txt"
+    outputFilePath = outputApkPath + "/" + outputFileName
+
+    text_file = open(outputFilePath, "w+")
+    return text_file
+    
+
 def get_xmlDoc(apkLocation):
     xmlDoc = parse_xml(get_folder_path(apkLocation) + "/resources/AndroidManifest.xml")
     return xmlDoc
 
     
-def print_app_details(xmlDoc):
-    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Application Details---------------------")
-    print ("""
+def print_app_details(xmlDoc, ouputFile):
+    appDetailsHeader = "\n---------------------Application Details---------------------"
+    print(Fore.CYAN + Style.BRIGHT + appDetailsHeader)
+    ouputFile.write(appDetailsHeader)
+
+    addDetailsBody = """
     Name            :{}
     Version Code    :{}
     Version Name    :{}
@@ -75,23 +87,42 @@ def print_app_details(xmlDoc):
             get_attribute(xmlDoc, "uses-sdk", "android:targetSdkVersion"),
             get_attribute(xmlDoc, "application", "android:name"),
             get_attribute(xmlDoc, "application", "android:allowBackup"),
-            get_attribute(xmlDoc, "application", "android:debuggable")))
+            get_attribute(xmlDoc, "application", "android:debuggable"))
+    print (addDetailsBody)
+    ouputFile.write(addDetailsBody)
 
 
-def print_app_components(appComponents):
-    print(Fore.CYAN + Style.BRIGHT + "---------------------Application Components---------------------\n")
+def print_app_components(appComponents, ouputFile):
+    appComponentsHeader = "---------------------Application Components---------------------\n"
+    print(Fore.CYAN + Style.BRIGHT + appComponentsHeader)
+    ouputFile.write("\n" + appComponentsHeader)
+
     for appComponent in appComponents:
         if (appComponent[1] == "Exported"):
             print("{}\t{}".format(appComponent[0], Fore.YELLOW + Style.BRIGHT + "\t(Exported)"))
+            ouputFile.write("{}\t{}\n".format(appComponent[0], "\t(Exported)"))
         else:
             print(appComponent[0])
+            ouputFile.write(appComponent[0] + "\n")
 
+def print_app_permissions(appPermissions, ouputFile):
+    addPermissionsHeader = "---------------------Application Permissions---------------------\n"
+    print(Fore.CYAN + Style.BRIGHT + addPermissionsHeader)
+    ouputFile.write("\n" + addPermissionsHeader)
 
-def print_app_permissions(appPermissions):
-    print(Fore.CYAN + Style.BRIGHT + "---------------------Application Permissions---------------------\n")
     for appPermission in appPermissions:
         print(appPermission)
+        ouputFile.write("\n" + appPermission + "\n")
 
+
+def print_app_strings(appStrings, ouputFile):
+    addStringsHeader = "---------------------Application Strings---------------------\n"
+    print(Fore.CYAN + Style.BRIGHT + addStringsHeader)
+    ouputFile.write("\n" + addStringsHeader + "\n")
+
+    for appString in appStrings:
+        print(appString)
+        ouputFile.write("\n" + addStringsHeader + "\n")
 
 def print_module_selection():
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Module Selection---------------------\n")
@@ -156,21 +187,25 @@ try:
                 outputPath = moveZipToOutput(sys.argv[1])
 
             apkOrZip = True
+            ouputFile = create_output_file(outputPath, appName)
 
             xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
-            print_app_details(xmlDoc)
+            print_app_details(xmlDoc, ouputFile)
 
             appComponents = get_app_components(xmlDoc)
-            print_app_components(appComponents)
+            print_app_components(appComponents, ouputFile)
 
             appPermissions = get_app_permissions(xmlDoc)
-            print_app_permissions(appPermissions)
+            print_app_permissions(appPermissions, ouputFile)
 
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
+            # print_app_strings(strings, ouputFile)
+
             start_initial_scan(outputPath)
 
             deeplinks = get_deeplinks(xmlDoc)
-            print_deepLinks_map(deeplinks)
+            print_deepLinks_map(deeplinks, ouputFile)
+            ouputFile.close()
         
         else:
             print_usage()
