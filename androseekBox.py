@@ -99,7 +99,7 @@ def print_app_components(appComponents, ouputFile):
 
     for appComponent in appComponents:
         if (appComponent[1] == "Exported"):
-            print("{}\t{}".format(appComponent[0], Fore.YELLOW + Style.BRIGHT + "\t(Exported)"))
+            print("{} {}".format(appComponent[0], Fore.YELLOW + Style.BRIGHT + "(Exported)"))
             ouputFile.write("{}\t{}\n".format(appComponent[0], "\t(Exported)"))
         else:
             print(appComponent[0])
