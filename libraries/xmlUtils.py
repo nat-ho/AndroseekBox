@@ -142,9 +142,8 @@ def print_deepLinks_map(deeplinks_r, ouputFile):
         deeplinks = deeplinks_r
         a = 0
 
-        deeplinksHeader = "\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":"
-        print(Fore.CYAN + Style.BRIGHT + deeplinksHeader)
-        ouputFile.write(deeplinksHeader + "\n")
+        print(Fore.CYAN + Style.BRIGHT + "\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":")
+        ouputFile.write("\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":" + "\n")
 
         try:
             for key in deeplinks:

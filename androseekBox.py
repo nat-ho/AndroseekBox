@@ -93,36 +93,33 @@ def print_app_details(xmlDoc, ouputFile):
 
 
 def print_app_components(appComponents, ouputFile):
-    appComponentsHeader = "---------------------Application Components---------------------\n"
-    print(Fore.CYAN + Style.BRIGHT + appComponentsHeader)
-    ouputFile.write("\n" + appComponentsHeader)
+    print(Fore.CYAN + Style.BRIGHT + "---------------------Application Components---------------------\n")
+    ouputFile.write("\n---------------------Application Components---------------------\n")
 
     for appComponent in appComponents:
         if (appComponent[1] == "Exported"):
             print("{} {}".format(appComponent[0], Fore.YELLOW + Style.BRIGHT + "(Exported)"))
-            ouputFile.write("{}\t{}\n".format(appComponent[0], "\t(Exported)"))
+            ouputFile.write("{} {}\n".format(appComponent[0], "(Exported)"))
         else:
             print(appComponent[0])
             ouputFile.write(appComponent[0] + "\n")
 
 def print_app_permissions(appPermissions, ouputFile):
-    addPermissionsHeader = "---------------------Application Permissions---------------------\n"
-    print(Fore.CYAN + Style.BRIGHT + addPermissionsHeader)
-    ouputFile.write("\n" + addPermissionsHeader)
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Application Permissions---------------------\n")
+    ouputFile.write("\n---------------------Application Permissions---------------------\n")
 
     for appPermission in appPermissions:
         print(appPermission)
-        ouputFile.write("\n" + appPermission + "\n")
+        ouputFile.write(appPermission + "\n")
 
 
 def print_app_strings(appStrings, ouputFile):
-    addStringsHeader = "---------------------Application Strings---------------------\n"
-    print(Fore.CYAN + Style.BRIGHT + addStringsHeader)
-    ouputFile.write("\n" + addStringsHeader + "\n")
+    print(Fore.CYAN + Style.BRIGHT + "\n---------------------Application Strings---------------------\n")
+    ouputFile.write("\n---------------------Application Strings---------------------\n")
 
     for appString in appStrings:
         print(appString)
-        ouputFile.write("\n" + addStringsHeader + "\n")
+        ouputFile.write(appString + "\n")
 
 def print_module_selection():
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Module Selection---------------------\n")
@@ -134,12 +131,12 @@ def print_module_selection():
     
 
 # Python 3.9 and below
-def execute_module(userInput, folderPath, xmlDoc):
+def execute_module(userInput, folderPath, xmlDoc, ouputFile):
     switcher = {
-        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc),
-        '2' : lambda : scan_click_fraud(folderPath, xmlDoc),
-        '3' : lambda : scan_spyware(folderPath, xmlDoc),
-        '4' : lambda : scan_backdoor(folderPath, xmlDoc),
+        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc, ouputFile),
+        '2' : lambda : scan_click_fraud(folderPath, xmlDoc, ouputFile),
+        '3' : lambda : scan_spyware(folderPath, xmlDoc, ouputFile),
+        '4' : lambda : scan_backdoor(folderPath, xmlDoc, ouputFile),
         'default' : lambda : print(Fore.RED + "\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
@@ -149,13 +146,13 @@ def execute_module(userInput, folderPath, xmlDoc):
 # def execute_module(userInput):
 #     match userInput:
 #         case '1':
-#             scan_sms_fraud(folderPath, xmlDoc)
+#             scan_sms_fraud(folderPath, xmlDoc, ouputFile)
 #         case '2':
-#             scan_click_fraud(folderPath, xmlDoc)
+#             scan_click_fraud(folderPath, xmlDoc, ouputFile)
 #         case '3':
-#             scan_spyware(folderPath, xmlDoc)
+#             scan_spyware(folderPath, xmlDoc, ouputFile)
 #         case '4':
-#             scan_backdoor(folderPath, xmlDoc)
+#             scan_backdoor(folderPath, xmlDoc, ouputFile)
 #         case _:
 #             print(Fore.RED + "Unrecognized module ID!")
 
@@ -201,7 +198,7 @@ try:
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
             # print_app_strings(strings, ouputFile)
 
-            start_initial_scan(outputPath)
+            start_initial_scan(outputPath, ouputFile)
 
             deeplinks = get_deeplinks(xmlDoc)
             print_deepLinks_map(deeplinks, ouputFile)
@@ -212,7 +209,7 @@ try:
             sys.exit(Fore.RED + "Please run the program again with the required files!")
 
 except Exception as e:
-    print(Fore.RED + e)
+    print(e)
 
 if (apkOrZip == True):
     print_module_selection()
@@ -221,7 +218,7 @@ if (apkOrZip == True):
     while (userInput.lower() != "exit"):
         folderPath = get_folder_path(sys.argv[1])
         xmlDoc = get_xmlDoc(sys.argv[1])
-        execute_module(userInput, folderPath, xmlDoc)
+        execute_module(userInput, folderPath, xmlDoc, ouputFile)
 
         print_module_selection()
         userInput = input("\nEnter another module: ")
