@@ -21,10 +21,10 @@ usage and examples.
 
 ## Tools Used
 
-An overview of the main tools used in `AndroseekBox`:
+An overview of the main libraries used in `AndroseekBox`:
 
-- `jadx`
-- `javalang`
+- [jadx](https://github.com/skylot/jadx)
+- [javalang](https://github.com/c2nes/javalang)
 
 <br>
 

@@ -69,7 +69,7 @@ previously.
 
 - To start the analysis with an Android APK file:
     ```
-    python AndroseekBox.py MalwareSample1.apk
+    python3 AndroseekBox.py MalwareSample1.apk
     ```
 
     ![Initial analysis results](/docs/images/Result_InitialAnalysis.png)
