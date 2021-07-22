@@ -5,7 +5,7 @@ from colorama import init, Fore, Style
 from threading import Thread
 
 urlRegEx = "(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+):?\d*)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?"
-ipRegEx = "\\b(?!(?:10\.|127\.|172\.(?:1[6-9]|2[0-9]|3[0-2])\.|192\.168\.))((?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2(?:[0-4][0-9]|5[0-4])|[0-1]?[0-9]?[0-9])))\\b"
+ipRegEx = '\"\\b(?!(?:10\.|127\.|172\.(?:1[6-9]|2[0-9]|3[0-2])\.|192\.168\.))((?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2(?:[0-4][0-9]|5[0-4])|[0-1]?[0-9]?[0-9])))\\b\"'
 nativeLibraryLoadRegEx = "(System\.(loadLibrary|load)\(.*\))"
 nativeMethodRegEx = "((private|public)\sstatic\snative.*\(.*\))"
 
@@ -40,14 +40,15 @@ def extract_ip(file):
             ipList.append(result)
 
 
-def print_list(list):
+def print_list(list, ouputFile):
     counter = 0
     for item in list:
         counter += 1
         print("{}. {}".format(str(counter), item))
+        ouputFile.write("{}. {}\n".format(str(counter), item))
 
 
-def print_result():
+def print_result(ouputFile):
     global urlList, ipList, nativeLibraryList, nativeMethodList
     urlList = list(set(urlList))
     ipList = list(set(ipList))
@@ -55,30 +56,39 @@ def print_result():
     nativeMethodList = list(set(nativeMethodList))
 
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------URLs---------------------\n")
+    ouputFile.write("\n---------------------URLs---------------------\n")
     if (urlList):
-        print_list(urlList)
+        print_list(urlList, ouputFile)
     else:
         print(Fore.YELLOW + "No URL was found")
+        ouputFile.write("No URL was found")
 
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------IP Addresses---------------------\n")
+    ouputFile.write("\n---------------------IP Addresses---------------------\n")
     if (ipList):
-        print_list(ipList)
+        print_list(ipList, ouputFile)
     else:
         print(Fore.YELLOW + "No IP address were found")
+        ouputFile.write("No IP address were found")
     
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Native Libraries Loaded---------------------\n")
+    ouputFile.write("\n---------------------Native Libraries Loaded---------------------\n")
     if (nativeLibraryList):
-        print_list(nativeLibraryList)
+        print_list(nativeLibraryList, ouputFile)
     else:
         print(Fore.YELLOW + "No native libraries were loaded")
+        ouputFile.write("No native libraries were loaded")
     
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Native Methods---------------------\n")
+    ouputFile.write("\n---------------------Native Methods---------------------\n")
     if (nativeMethodList):
-        print_list(nativeMethodList)
+        print_list(nativeMethodList, ouputFile)
     else:
         print(Fore.YELLOW + "No native methods were found")
+        ouputFile.write("No native methods were found")
 
-def start_initial_scan(folderPath):
+
+def start_initial_scan(folderPath, ouputFile):
     hasException = False
     for subdir, dirs, files in os.walk(folderPath):
         for file in files:
@@ -107,4 +117,4 @@ def start_initial_scan(folderPath):
 
     if hasException:
         print(Fore.YELLOW + "Some results have have been ommitted due to exceptions")
-    print_result()
+    print_result(ouputFile)
