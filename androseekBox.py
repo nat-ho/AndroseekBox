@@ -14,6 +14,9 @@ from libraries.xmlUtils import *
 from libraries.apkUtils import *
 
 colorama.init(autoreset=True)
+outputFile = None
+outputFile = None
+appName = None
 
 def print_usage():
     print(Fore.YELLOW + """---------------------USAGE---------------------
@@ -59,6 +62,14 @@ def create_output_file(outputApkPath, appName):
 
     text_file = open(outputFilePath, "w+")
     return text_file
+
+
+def get_output_file(outputApkPath, appName):
+    outputFileName = appName + "_output.txt"
+    outputFilePath = outputApkPath + "/" + outputFileName
+
+    text_file = open(outputFilePath, "a")
+    return text_file
     
 
 def get_xmlDoc(apkLocation):
@@ -66,10 +77,10 @@ def get_xmlDoc(apkLocation):
     return xmlDoc
 
     
-def print_app_details(xmlDoc, ouputFile):
+def print_app_details(xmlDoc, outputFile):
     appDetailsHeader = "\n---------------------Application Details---------------------"
     print(Fore.CYAN + Style.BRIGHT + appDetailsHeader)
-    ouputFile.write(appDetailsHeader)
+    outputFile.write(appDetailsHeader)
 
     addDetailsBody = """
     Name            :{}
@@ -89,37 +100,37 @@ def print_app_details(xmlDoc, ouputFile):
             get_attribute(xmlDoc, "application", "android:allowBackup"),
             get_attribute(xmlDoc, "application", "android:debuggable"))
     print (addDetailsBody)
-    ouputFile.write(addDetailsBody)
+    outputFile.write(addDetailsBody)
 
 
-def print_app_components(appComponents, ouputFile):
+def print_app_components(appComponents, outputFile):
     print(Fore.CYAN + Style.BRIGHT + "---------------------Application Components---------------------\n")
-    ouputFile.write("\n---------------------Application Components---------------------\n")
+    outputFile.write("\n---------------------Application Components---------------------\n")
 
     for appComponent in appComponents:
         if (appComponent[1] == "Exported"):
             print("{} {}".format(appComponent[0], Fore.YELLOW + Style.BRIGHT + "(Exported)"))
-            ouputFile.write("{} {}\n".format(appComponent[0], "(Exported)"))
+            outputFile.write("{} {}\n".format(appComponent[0], "(Exported)"))
         else:
             print(appComponent[0])
-            ouputFile.write(appComponent[0] + "\n")
+            outputFile.write(appComponent[0] + "\n")
 
-def print_app_permissions(appPermissions, ouputFile):
+def print_app_permissions(appPermissions, outputFile):
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Application Permissions---------------------\n")
-    ouputFile.write("\n---------------------Application Permissions---------------------\n")
+    outputFile.write("\n---------------------Application Permissions---------------------\n")
 
     for appPermission in appPermissions:
         print(appPermission)
-        ouputFile.write(appPermission + "\n")
+        outputFile.write(appPermission + "\n")
 
 
-def print_app_strings(appStrings, ouputFile):
+def print_app_strings(appStrings, outputFile):
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Application Strings---------------------\n")
-    ouputFile.write("\n---------------------Application Strings---------------------\n")
+    outputFile.write("\n---------------------Application Strings---------------------\n")
 
     for appString in appStrings:
         print(appString)
-        ouputFile.write(appString + "\n")
+        outputFile.write(appString + "\n")
 
 def print_module_selection():
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Module Selection---------------------\n")
@@ -131,12 +142,12 @@ def print_module_selection():
     
 
 # Python 3.9 and below
-def execute_module(userInput, folderPath, xmlDoc, ouputFile):
+def execute_module(userInput, folderPath, xmlDoc, outputFile):
     switcher = {
-        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc, ouputFile),
-        '2' : lambda : scan_click_fraud(folderPath, xmlDoc, ouputFile),
-        '3' : lambda : scan_spyware(folderPath, xmlDoc, ouputFile),
-        '4' : lambda : scan_backdoor(folderPath, xmlDoc, ouputFile),
+        '1' : lambda : scan_sms_fraud(folderPath, xmlDoc, outputFile),
+        '2' : lambda : scan_click_fraud(folderPath, xmlDoc, outputFile),
+        '3' : lambda : scan_spyware(folderPath, xmlDoc, outputFile),
+        '4' : lambda : scan_backdoor(folderPath, xmlDoc, outputFile),
         'default' : lambda : print(Fore.RED + "\nUnrecognized module ID! Please enter again.")
     }
     return switcher.get(userInput, switcher.get('default'))()
@@ -146,13 +157,13 @@ def execute_module(userInput, folderPath, xmlDoc, ouputFile):
 # def execute_module(userInput):
 #     match userInput:
 #         case '1':
-#             scan_sms_fraud(folderPath, xmlDoc, ouputFile)
+#             scan_sms_fraud(folderPath, xmlDoc, outputFile)
 #         case '2':
-#             scan_click_fraud(folderPath, xmlDoc, ouputFile)
+#             scan_click_fraud(folderPath, xmlDoc, outputFile)
 #         case '3':
-#             scan_spyware(folderPath, xmlDoc, ouputFile)
+#             scan_spyware(folderPath, xmlDoc, outputFile)
 #         case '4':
-#             scan_backdoor(folderPath, xmlDoc, ouputFile)
+#             scan_backdoor(folderPath, xmlDoc, outputFile)
 #         case _:
 #             print(Fore.RED + "Unrecognized module ID!")
 
@@ -184,25 +195,25 @@ try:
                 outputPath = moveZipToOutput(sys.argv[1])
 
             apkOrZip = True
-            ouputFile = create_output_file(outputPath, appName)
+            outputFile = create_output_file(outputPath, appName)
 
             xmlDoc = parse_xml(outputPath + "/resources/AndroidManifest.xml")
-            print_app_details(xmlDoc, ouputFile)
+            print_app_details(xmlDoc, outputFile)
 
             appComponents = get_app_components(xmlDoc)
-            print_app_components(appComponents, ouputFile)
+            print_app_components(appComponents, outputFile)
 
             appPermissions = get_app_permissions(xmlDoc)
-            print_app_permissions(appPermissions, ouputFile)
+            print_app_permissions(appPermissions, outputFile)
 
             strings = parse_xml_strings(outputPath + "/resources/res/values/strings.xml")
-            # print_app_strings(strings, ouputFile)
+            # print_app_strings(strings, outputFile)
 
-            start_initial_scan(outputPath, ouputFile)
+            start_initial_scan(outputPath, outputFile)
 
             deeplinks = get_deeplinks(xmlDoc)
-            print_deepLinks_map(deeplinks, ouputFile)
-            ouputFile.close()
+            print_deepLinks_map(deeplinks, outputFile)
+            outputFile.close()
         
         else:
             print_usage()
@@ -216,11 +227,14 @@ if (apkOrZip == True):
     userInput = input("\nModule: ")
 
     while (userInput.lower() != "exit"):
+        outputFile = get_output_file(outputPath, appName)
+
         folderPath = get_folder_path(sys.argv[1])
         xmlDoc = get_xmlDoc(sys.argv[1])
-        execute_module(userInput, folderPath, xmlDoc, ouputFile)
+        execute_module(userInput, folderPath, xmlDoc, outputFile)
 
         print_module_selection()
+        outputFile.close()
         userInput = input("\nEnter another module: ")
 
     print(Fore.CYAN + "\nGoodbye!")

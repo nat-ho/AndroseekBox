@@ -138,25 +138,25 @@ def get_deeplinks(xmlDoc):
     return deeplinksTree
 
 
-def print_deepLinks_map(deeplinks_r, ouputFile):
+def print_deepLinks_map(deeplinks_r, outputFile):
         deeplinks = deeplinks_r
         a = 0
 
         print(Fore.CYAN + Style.BRIGHT + "\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":")
-        ouputFile.write("\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":" + "\n")
+        outputFile.write("\n" + "-" * 40 + "DeepLinks Map" + "-" * 40 + ":" + "\n")
 
         try:
             for key in deeplinks:
                 print("Deeplinks that trigger: " + key)
-                ouputFile.write("Deeplinks that trigger: " + key + "\n")
+                outputFile.write("Deeplinks that trigger: " + key + "\n")
 
                 for value in deeplinks[key]:
                     #deeplinks.append(value)
                     print("\t|-> " + value)
-                    ouputFile.write("\t|-> " + value + "\n")
+                    outputFile.write("\t|-> " + value + "\n")
                     a = a+1
             print(Fore.CYAN + Style.BRIGHT + "-" * 38 + "Total Deeplinks:{}".format(a) + "-" * 38 + "|")
-            ouputFile.write("-" * 38 + "Total Deeplinks:{}".format(a) + "-" * 38 + "|" + "\n")
+            outputFile.write("-" * 38 + "Total Deeplinks:{}".format(a) + "-" * 38 + "|" + "\n")
 
         except Exception as e:
             print(e)

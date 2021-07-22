@@ -54,30 +54,40 @@ def find_permissions(xmlDoc):
         print(Fore.YELLOW + "Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
 
 
-def print_result():
+def print_result(outputFile):
     global foundBackdoorApiList, foundPermissionList
     foundBackdoorApiList = list(set(foundBackdoorApiList))
     foundPermissionList = list(set(foundPermissionList))
 
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related API Calls---------------------")
+    outputFile.write("\n[Backdoor Module]\n")
+    outputFile.write("\n---------------------Related API Calls---------------------\n")
     if (foundBackdoorApiList):
         for apiCallCount, apiCall in enumerate(foundBackdoorApiList):
             print("{}.\tAPI Call: {}".format(apiCallCount+1, apiCall[2]))
             print("\tFile Path: {}".format(apiCall[0]))
             print("\tPackage: {}".format(apiCall[1]))
             print("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
+            outputFile.write("{}.\tAPI Call: {}\n".format(apiCallCount+1, apiCall[2]))
+            outputFile.write("\tFile Path: {}\n".format(apiCall[0]))
+            outputFile.write("\tPackage: {}\n".format(apiCall[1]))
+            outputFile.write("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
     else:
         print(Fore.YELLOW + "No related API calls were found")
+        outputFile.write("No related API calls were found\n")
 
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related Permissions Declared---------------------")
+    outputFile.write("\n---------------------Related Permissions Declared---------------------\n")
     if (foundPermissionList):
         for permissionCount, permission in enumerate(foundPermissionList):
             print("{}.\t{}".format(permissionCount+1, permission))
+            outputFile.write("{}.\t{}\n".format(permissionCount+1, permission))
     else:
         print(Fore.YELLOW + "No related permissions were found")
+        outputFile.write("No related permissions were found\n")
 
 
-def scan_backdoor(folderPath, xmlDoc):
+def scan_backdoor(folderPath, xmlDoc, outputFile):
     hasException = False
     find_permissions(xmlDoc)
 
@@ -95,4 +105,4 @@ def scan_backdoor(folderPath, xmlDoc):
     if hasException:
         print(Fore.YELLOW + "Some results have been ommitted due to exceptions")
 
-    print_result()
+    print_result(outputFile)

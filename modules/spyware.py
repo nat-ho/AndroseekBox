@@ -181,76 +181,98 @@ def find_permissions(xmlDoc):
 
 
 # Print runner function
-def print_result():
+def print_result(outputFile):
     global extractedScreenCaptureInfo, extractedDeviceReconInfo, extractedKeyloggerInfo, extractedSLocationTrackingInfo, extractedCameraRecordingInfo, extractedClipboardTrackingInfo
 
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to screen capture Spyware" + "-" * 40)
+    outputFile.write("\n[Spyware Module]\n")
+    outputFile.write("\n" + "-" * 40 + "Information related to screen capture Spyware" + "-" * 40 + "\n")
     if (extractedScreenCaptureInfo):
-        print_all_information(extractedScreenCaptureInfo)
+        print_all_information(extractedScreenCaptureInfo, outputFile)
 
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to device recon Spyware" + "-" * 40)
+    outputFile.write("\n" + "-" * 40 + "Information related to device recon Spyware" + "-" * 40 + "\n")
     if (extractedDeviceReconInfo):
-        print_all_information(extractedDeviceReconInfo)
+        print_all_information(extractedDeviceReconInfo, outputFile)
 
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40)
+    outputFile.write("\n" + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40 + "\n")
     if (extractedKeyloggerInfo):
-        print_all_information(extractedKeyloggerInfo)
+        print_all_information(extractedKeyloggerInfo, outputFile)
 
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to location tracking Spyware" + "-" * 40)
+    outputFile.write("\n" + "-" * 40 + "Information related to location tracking Spyware" + "-" * 40 + "\n")
     if (extractedSLocationTrackingInfo):
-        print_all_information(extractedSLocationTrackingInfo)
+        print_all_information(extractedSLocationTrackingInfo, outputFile)
 
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40)
+    outputFile.write("\n" + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40 + "\n")
     if (extractedCameraRecordingInfo):
-        print_all_information(extractedCameraRecordingInfo)
+        print_all_information(extractedCameraRecordingInfo, outputFile)
 
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40)
+    outputFile.write("\n" + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40 + "\n")
     if (extractedClipboardTrackingInfo):
-        print_all_information(extractedClipboardTrackingInfo)
+        print_all_information(extractedClipboardTrackingInfo, outputFile)
    
 
-def print_all_information(extractedInfo):
+def print_all_information(extractedInfo, outputFile):
     for category, infoList in enumerate(extractedInfo):
         filteredInfo = list(set(infoList))
         if category == 0:
             print(Fore.GREEN + "[Related API Calls]")
-            print_apiCalls(filteredInfo)
+            outputFile.write("[Related API Calls]\n")
+            print_apiCalls(filteredInfo, outputFile)
         elif category == 1:
             print(Fore.GREEN + "[Related Class Imports]")
-            print_classImports(filteredInfo)
+            outputFile.write("[Related Class Imports]\n")
+            print_classImports(filteredInfo, outputFile)
         elif category == 2:
             print(Fore.GREEN + "[Related Permissions]")
-            print_permissions(filteredInfo)
+            outputFile.write("[Related Permissions]\n")
+            print_permissions(filteredInfo, outputFile)
 
 
-def print_apiCalls(apiCalls):
+def print_apiCalls(apiCalls, outputFile):
     if apiCalls:
         for apiCallCount, apiCall in enumerate(apiCalls):
             print("{}.\tAPI Call: {}".format(apiCallCount+1,apiCall[2]))
             print("\tFile Path: {}".format(apiCall[0]))
             print("\tPackage: {}".format(apiCall[1]))
             print("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
+            outputFile.write("{}.\tAPI Call: {}\n".format(apiCallCount+1,apiCall[2]))
+            outputFile.write("\tFile Path: {}\n".format(apiCall[0]))
+            outputFile.write("\tPackage: {}\n".format(apiCall[1]))
+            outputFile.write("\tLine Number & Column Number: ({}, {})\n".format(apiCall[3], apiCall[4]))
     else:
         print(Fore.YELLOW + "No related API Calls were found\n")
+        outputFile.write("No related API Calls were found\n")
 
 
-def print_classImports(classImports):
+def print_classImports(classImports, outputFile):
     if classImports:
         for importCount, classImport in enumerate(classImports):
             print("{}.\tImport: {}".format(importCount+1, classImport[2]))
             print("\tFile Path: {}".format(classImport[0]))
             print("\tPackage: {}".format(classImport[1]))
             print("\tLine Number & Column Number: ({}, {})\n".format(classImport[3], classImport[4]))
+            outputFile.write("{}.\tImport: {}\n".format(importCount+1, classImport[2]))
+            outputFile.write("\tFile Path: {}\n".format(classImport[0]))
+            outputFile.write("\tPackage: {}\n".format(classImport[1]))
+            outputFile.write("\tLine Number & Column Number: ({}, {})\n".format(classImport[3], classImport[4]))
     else:
         print(Fore.YELLOW + "No related Class Imports were found\n")
+        outputFile.write("No related Class Imports were found\n")
 
 
-def print_permissions(permissions):
+def print_permissions(permissions, outputFile):
     if permissions:
         for permissionCount, permission in enumerate(permissions):
             print("{}.\t{}\n".format(permissionCount+1, permission))
+            outputFile.write("{}.\t{}\n".format(permissionCount+1, permission))
     else:
         print(Fore.YELLOW + "No related Permissions were found\n")
+        outputFile.write("No related Permissions were found\n")
     print("\n")
 
 
@@ -328,7 +350,7 @@ def false_positive_cleanup():
 
 
 # Main runner function
-def scan_spyware(folderPath, xmlDoc):
+def scan_spyware(folderPath, xmlDoc, outputFile):
     hasException = False
     find_permissions(xmlDoc)
 
@@ -358,4 +380,5 @@ def scan_spyware(folderPath, xmlDoc):
 
     if hasException:
         print(Fore.YELLOW + "Some results have been ommitted due to exceptions")
-    print_result()
+
+    print_result(outputFile)
