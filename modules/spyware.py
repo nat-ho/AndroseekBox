@@ -97,7 +97,7 @@ cameraRecordingImports = {
     "android.media.MediaRecorder", "android.media.AudioRecord"
 }
 cameraRecordingAPIs = {
-    "setAudioSource", "setVideoSource", "setOutputFile", "prepare", "getSurface", "read", 
+    "setAudioSource", "setVideoSource", "setOutputFile", "prepare", "start", "getSurface", "read", 
     "getActiveMicrophones", "getAudioSource", "startRecording"
 }
 cameraRecordingPermissions = {
@@ -317,9 +317,8 @@ def cleanup_clipboardTracking_apiCalls(apiCall):
     if (apiCall == "hasText" or apiCall == "getText"):
         return False
     return apiCall
-"""
 
-"""
+
 def false_positive_cleanup():
     global extractedKeyloggerInfo, extractedCameraRecordingInfo, extractedClipboardTrackingInfo
     
