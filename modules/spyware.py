@@ -9,10 +9,10 @@ from libraries.xmlUtils import get_attribute_list
 
 extractedScreenCaptureInfo = [[] for i in range(3)]
 extractedDeviceReconInfo = [[] for i in range(3)]
-extractedKeyloggerInfo = [[] for i in range(3)]
 extractedSLocationTrackingInfo = [[] for i in range(3)]
-extractedCameraRecordingInfo = [[] for i in range(3)]
-extractedClipboardTrackingInfo = [[] for i in range(3)]
+# extractedKeyloggerInfo = [[] for i in range(3)]
+# extractedCameraRecordingInfo = [[] for i in range(3)]
+# extractedClipboardTrackingInfo = [[] for i in range(3)]
 
 # SCREEN CAPTURE
 # createScreenCaptureIntent: Creates an intent in order to start screen capture
@@ -39,19 +39,6 @@ deviceReconAPIs = {
 }
 deviceReconPermissions = {
     "android.permission.READ_PHONE_STATE", "android.permission.READ_SMS", "android.permission.READ_PHONE_NUMBERS"
-}
-
-# KEYLOGGER
-# getText: Detects if Accessibility Service is used in conjunction with getText() method which can be used to log keystrokes to the console
-# https://stackoverflow.com/questions/27245185/android-key-logger
-keyloggerImports = {
-    "android.view.accessibility.AccessibilityNodeInfo", "android.view.accessibility.AccessibilityEvent"
-}
-keyloggerAPIs = {
-    "getText", "getEventType", "getAction"
-}
-keyloggerPermissions = {
-    "android.permission.BIND_ACCESSIBILITY_SERVICE"
 }
 
 # LOCATION TRACKING
@@ -82,10 +69,25 @@ locationTrackingPermissions = {
     "android.permission.ACCESS_BACKGROUND_LOCATION", "android.permission.READ_PHONE_STATE"
 }
 
+""" (Not in current use as these checks may return a lot of false positive results due to the library and API calls being very common even in benign apps)
+# KEYLOGGER
+# getText: Detects if Accessibility Service is used in conjunction with getText() method which can be used to log keystrokes to the console
+# https://github.com/n37sn4k3/Android-Accessibility-Keylogger
+# https://github.com/bshu2/Android-Keylogger
+keyloggerImports = {
+    "android.view.accessibility.AccessibilityNodeInfo", "android.view.accessibility.AccessibilityEvent"
+}
+keyloggerAPIs = {
+    "getText", "getEventType", "getAction"
+}
+keyloggerPermissions = {
+    "android.permission.BIND_ACCESSIBILITY_SERVICE"
+}
+
 # CAMERA RECORDING MONITORS
 # setAudioSource & setVideoSource: Sets video and audio source used for recording
 # setOutputFile: Sets file object to be written during recording
-# prepare & start & stop: Controls capturing and encoding of data
+# prepare & start: Controls capturing and encoding of data
 # getSurface: Retrieves surface object from MediaRecorder
 # read: Audio data is being read
 # getActiveMicrophones: Retrieve active microphones
@@ -95,8 +97,8 @@ cameraRecordingImports = {
     "android.media.MediaRecorder", "android.media.AudioRecord"
 }
 cameraRecordingAPIs = {
-    "setAudioSource", "setVideoSource", "setOutputFile", "prepare", "start", "stop", "getSurface", "read", 
-    "getActiveMicrophones", "getAudioSource", "startRecording", "stop"
+    "setAudioSource", "setVideoSource", "setOutputFile", "prepare", "getSurface", "read", 
+    "getActiveMicrophones", "getAudioSource", "startRecording"
 }
 cameraRecordingPermissions = {
     "android.permission.CAMERA", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.RECORD_AUDIO"
@@ -113,6 +115,7 @@ clipboardTrackingImports = {
 clipboardTrackingAPIs = {
     "hasPrimaryClip", "getPrimaryClip", "hasText", "getText"
 }
+"""
 
 
 def find_api_calls(filePath, sourcecode):
@@ -125,14 +128,14 @@ def find_api_calls(filePath, sourcecode):
                 extractedScreenCaptureInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
             if (node.member in deviceReconAPIs):
                 extractedDeviceReconInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            if (node.member in keyloggerAPIs):
-                extractedKeyloggerInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
             if (node.member in locationTrackingAPIs):
                 extractedSLocationTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            if (node.member in cameraRecordingAPIs):
-                extractedCameraRecordingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
-            if (node.member in clipboardTrackingAPIs):
-                extractedClipboardTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            # if (node.member in keyloggerAPIs):
+            #     extractedKeyloggerInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            # if (node.member in cameraRecordingAPIs):
+            #     extractedCameraRecordingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
+            # if (node.member in clipboardTrackingAPIs):
+            #     extractedClipboardTrackingInfo[0].append((filePath, packageName, node.member, node.position.line, node.position.column))
     except Exception as e:
         print(Fore.YELLOW + "Exception occured when parsing {} for API calls : :{}".format(filePath, e))
 
@@ -147,14 +150,14 @@ def find_imports(filePath, sourcecode):
                 extractedScreenCaptureInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
             elif (node.path in deviceReconImports):
                 extractedDeviceReconInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
-            elif (node.path in keyloggerImports):
-                extractedKeyloggerInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
             elif (node.path in locationTrackingImports):
                 extractedSLocationTrackingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
-            elif (node.path in cameraRecordingImports):
-                extractedCameraRecordingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
-            elif (node.path in clipboardTrackingImports):
-                extractedClipboardTrackingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            # elif (node.path in keyloggerImports):
+            #     extractedKeyloggerInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            # elif (node.path in cameraRecordingImports):
+            #     extractedCameraRecordingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
+            # elif (node.path in clipboardTrackingImports):
+            #     extractedClipboardTrackingInfo[1].append((filePath, packageName, node.path, node.position.line, node.position.column))
 
     except Exception as e:
         print(Fore.YELLOW + "Exception occured when parsing {} for imported classes : :{}".format(filePath, e))
@@ -169,12 +172,12 @@ def find_permissions(xmlDoc):
                 extractedScreenCaptureInfo[2].append(permission)
             elif (permission in deviceReconPermissions):
                 extractedDeviceReconInfo[2].append(permission)
-            elif (permission in keyloggerPermissions):
-                extractedKeyloggerInfo[2].append(permission)
             elif (permission in locationTrackingPermissions):
                 extractedSLocationTrackingInfo[2].append(permission)
-            elif (permission in cameraRecordingPermissions):
-                extractedCameraRecordingInfo[2].append(permission)
+            # elif (permission in keyloggerPermissions):
+            #     extractedKeyloggerInfo[2].append(permission)
+            # elif (permission in cameraRecordingPermissions):
+            #     extractedCameraRecordingInfo[2].append(permission)
 
     except Exception as e:
         print(Fore.YELLOW + "Exception occured when parsing Android Manifest XML for permissions requested : :{}".format(e))
@@ -194,26 +197,26 @@ def print_result(outputFile):
     outputFile.write("\n" + "-" * 40 + "Information related to device recon Spyware" + "-" * 40 + "\n")
     if (extractedDeviceReconInfo):
         print_all_information(extractedDeviceReconInfo, outputFile)
-
-    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40)
-    outputFile.write("\n" + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40 + "\n")
-    if (extractedKeyloggerInfo):
-        print_all_information(extractedKeyloggerInfo, outputFile)
-
+    
     print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to location tracking Spyware" + "-" * 40)
     outputFile.write("\n" + "-" * 40 + "Information related to location tracking Spyware" + "-" * 40 + "\n")
     if (extractedSLocationTrackingInfo):
         print_all_information(extractedSLocationTrackingInfo, outputFile)
 
-    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40)
-    outputFile.write("\n" + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40 + "\n")
-    if (extractedCameraRecordingInfo):
-        print_all_information(extractedCameraRecordingInfo, outputFile)
+    # print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40)
+    # outputFile.write("\n" + "-" * 40 + "Information related to keylogger Spyware" + "-" * 40 + "\n")
+    # if (extractedKeyloggerInfo):
+    #     print_all_information(extractedKeyloggerInfo, outputFile)
 
-    print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40)
-    outputFile.write("\n" + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40 + "\n")
-    if (extractedClipboardTrackingInfo):
-        print_all_information(extractedClipboardTrackingInfo, outputFile)
+    # print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40)
+    # outputFile.write("\n" + "-" * 40 + "Information related to camera recording Spyware" + "-" * 40 + "\n")
+    # if (extractedCameraRecordingInfo):
+    #     print_all_information(extractedCameraRecordingInfo, outputFile)
+
+    # print(Fore.CYAN + Style.BRIGHT + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40)
+    # outputFile.write("\n" + "-" * 40 + "Information related to clipboard tracking Spyware" + "-" * 40 + "\n")
+    # if (extractedClipboardTrackingInfo):
+    #     print_all_information(extractedClipboardTrackingInfo, outputFile)
    
 
 def print_all_information(extractedInfo, outputFile):
@@ -276,8 +279,15 @@ def print_permissions(permissions, outputFile):
     print("\n")
 
 
-def cleanup_keylogger_apiCalls(apiCall):
-    if (apiCall == "getText" or apiCall == "getEventType" or apiCall == "getAction"):
+""" (Data cleaning functions to remove some false positive results)
+def cleanup_keylogger_accessibilityEvent_apiCalls(apiCall):
+    if (apiCall == "getEventType" or apiCall == "getAction"):
+        return False
+    return apiCall
+
+
+def cleanup_keylogger_accessibilityNodeInfo_apiCalls(apiCall):
+    if (apiCall == "getText"):
         return False
     return apiCall
 
@@ -289,14 +299,16 @@ def cleanup_keylogger_imports(importClass):
     return importClass
 
 
-def cleanup_camRecord_apiCalls_startStop(apiCall):
-    if (apiCall == "start" or apiCall == "stop"):
+def cleanup_camRecord_apiCalls(apiCall):
+    if (apiCall == "setAudioSource" or apiCall == "setVideoSource" or apiCall == "setOutputFile" or apiCall == "prepare" 
+            or apiCall == "start" or apiCall == "getSurface"):
         return False
     return apiCall
 
 
-def cleanup_camRecord_apiCalls_read(apiCall):
-    if (apiCall == "read"):
+def cleanup_audioRecord_apiCalls(apiCall):
+    if (apiCall == "read" or apiCall == "getActiveMicrophones" or apiCall == "getAudioSource" 
+            or apiCall == "startRecording"):
         return False
     return apiCall
 
@@ -305,21 +317,32 @@ def cleanup_clipboardTracking_apiCalls(apiCall):
     if (apiCall == "hasText" or apiCall == "getText"):
         return False
     return apiCall
+"""
 
-
+"""
 def false_positive_cleanup():
-    global extractedKeyloggerInfo, extractedDeviceReconInfo, extractedCameraRecordingInfo
-
+    global extractedKeyloggerInfo, extractedCameraRecordingInfo, extractedClipboardTrackingInfo
+    
     # Keylogger cleanup for getText(), AccessibilityNodeInfo and AccessibilityService
     foundKeyLoggerApiCalls = extractedKeyloggerInfo[0]
     foundKeyLoggerImports = extractedKeyloggerInfo[1]
     foundKeyLoggerPermissions = extractedKeyloggerInfo[2]
-    if "android.permission.BIND_ACCESSIBILITY_SERVICE" not in foundKeyLoggerPermissions:
-        # Retain getText(), getEventType(), getAction() and class imports only if required permission is present
-        foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_apiCalls(apiCall[2])]
+    if ("android.permission.BIND_ACCESSIBILITY_SERVICE" not in foundKeyLoggerPermissions):
+        # Remove getEventType(), getAction(), getText() API calls from the list if BIND_ACCESSIBILITY_SERVICE is not declared
+        foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_accessibilityEvent_apiCalls(apiCall[2])]
+        foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_accessibilityNodeInfo_apiCalls(apiCall[2])]
         foundKeyLoggerImports[:] = [importClass for importClass in foundKeyLoggerImports if cleanup_keylogger_imports(importClass[2])]
-        extractedKeyloggerInfo[0] = foundKeyLoggerApiCalls
-        extractedKeyloggerInfo[1] = foundKeyLoggerImports
+    else:
+        if ("android.view.accessibility.AccessibilityEvent" and "android.view.accessibility.AccessibilityNodeInfo" not in foundKeyLoggerImports):
+            # Remove getEventType(), getAction(), getText() API calls from the list if both AccessibilityEvent and AccessibilityNodeInfo are not imported
+            foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_accessibilityEvent_apiCalls(apiCall[2])]
+            foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_accessibilityNodeInfo_apiCalls(apiCall[2])]
+        elif ("android.view.accessibility.AccessibilityEvent" not in foundKeyLoggerImports):
+            # Remove getEventType() and getAction() API calls if AccessibilityEvent class is not imported
+            foundKeyLoggerApiCalls[:] = [apiCall for apiCall in foundKeyLoggerApiCalls if cleanup_keylogger_accessibilityEvent_apiCalls(apiCall[2])]
+    extractedKeyloggerInfo[0] = foundKeyLoggerApiCalls
+    extractedKeyloggerInfo[1] = [foundKeyLoggerImports]
+
 
     # Camera Recording cleanup for MediaRecorder start(), stop() and AudioRecord read()
     foundCameraRecordingApiCalls = extractedCameraRecordingInfo[0]
@@ -328,14 +351,14 @@ def false_positive_cleanup():
     for importClassTuple in extractedCameraRecordingInfo[1]:
         # Extract all import classes from tuple (Path, Package, Import Class, Line, Column) for list comprehension
         foundCameraRecordingImports.append(importClassTuple[2])
-
     if ("android.media.MediaRecorder" not in foundCameraRecordingImports or "android.permission.CAMERA" not in foundCameraRecordingAPermissions):
-        # Retain start() and stop() only if required permission and class import are present
-        foundCameraRecordingApiCalls[:] = [apiCall for apiCall in foundCameraRecordingApiCalls if cleanup_camRecord_apiCalls_startStop(apiCall[2])]
+        # Remove MediaRecorder related API calls if required permission and class import are not present
+        foundCameraRecordingApiCalls[:] = [apiCall for apiCall in foundCameraRecordingApiCalls if cleanup_camRecord_apiCalls(apiCall[2])]
     if ("android.media.AudioRecord" not in foundCameraRecordingImports or "android.permission.RECORD_AUDIO" not in foundCameraRecordingAPermissions):
-        # Retain read() only if required permission and class import are present
-        foundCameraRecordingApiCalls[:] = [apiCall for apiCall in foundCameraRecordingApiCalls if cleanup_camRecord_apiCalls_read(apiCall[2])]
+        # Remove AudioRecord related API calls if required permission and class import are not present
+        foundCameraRecordingApiCalls[:] = [apiCall for apiCall in foundCameraRecordingApiCalls if cleanup_audioRecord_apiCalls(apiCall[2])]
     extractedCameraRecordingInfo[0] = foundCameraRecordingApiCalls
+
 
     # Clipboard Tracking cleanup for hasText() and getText()
     foundClipboardTrackingApiCalls = extractedClipboardTrackingInfo[0]
@@ -347,6 +370,7 @@ def false_positive_cleanup():
         # Retain hasText() and getText() only if required class import is present
         foundClipboardTrackingApiCalls[:] = [apiCall for apiCall in foundClipboardTrackingApiCalls if cleanup_clipboardTracking_apiCalls(apiCall[2])]
     extractedClipboardTrackingInfo[0] = foundClipboardTrackingApiCalls
+"""
 
 
 # Main runner function
@@ -376,7 +400,7 @@ def scan_spyware(folderPath, xmlDoc, outputFile):
         except Exception as e:
             hasException = True
 
-    false_positive_cleanup()
+    # false_positive_cleanup()
 
     if hasException:
         print(Fore.YELLOW + "Some results have been ommitted due to exceptions")
