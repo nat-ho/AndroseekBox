@@ -66,7 +66,6 @@ def print_result(outputFile):
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related API Calls---------------------")
     outputFile.write("\n[Click Fraud Module]\n")
     outputFile.write("\n---------------------Related API Calls---------------------\n")
-
     if (foundApiList):
         for apiCallCount, apiCall in enumerate(foundApiList):
             print("{}.\tAPI Call: {}".format(apiCallCount+1, apiCall[2]))
@@ -83,7 +82,6 @@ def print_result(outputFile):
 
     print(Fore.CYAN + Style.BRIGHT + "\n---------------------Related Library Imports---------------------")
     outputFile.write("\n---------------------Related Library Imports---------------------\n")
-
     if (foundImportList):
         for importCount, classImport in enumerate(foundImportList):
             print("{}.\tImport: {}".format(importCount+1, classImport[2]))
